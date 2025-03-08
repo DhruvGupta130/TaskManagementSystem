@@ -1,20 +1,37 @@
 version: '3.8'
 
 services:
-  postgres-db:
+  # Database for User Service
+  user-db:
     image: postgres:16
-    container_name: postgres-db
+    container_name: user-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: userdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - user-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+
+  # Database for Task Service
+  task-db:
+    image: postgres:16
+    container_name: task-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: taskdb
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - task-data:/var/lib/postgresql/data
     networks:
       - task-network
 
+  # Eureka Server
   eureka-server:
     build: ./eureka-server
     container_name: eureka-server
@@ -23,6 +40,7 @@ services:
     networks:
       - task-network
 
+  # API Gateway
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -35,6 +53,7 @@ services:
     networks:
       - task-network
 
+  # User Service
   user-service:
     build: ./user-service
     container_name: user-service
@@ -42,15 +61,16 @@ services:
       - "8081:8081"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://postgres-db:5432/taskdb
+      DATASOURCE.URL: jdbc:postgresql://user-db:5432/userdb
       DATASOURCE.USERNAME: postgres
       DATASOURCE.PASSWORD: postgres
     depends_on:
       - eureka-server
-      - postgres-db
+      - user-db
     networks:
       - task-network
 
+  # Task Service
   task-service:
     build: ./task-service
     container_name: task-service
@@ -58,15 +78,16 @@ services:
       - "8082:8082"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://postgres-db:5432/taskdb
+      DATASOURCE.URL: jdbc:postgresql://task-db:5432/taskdb
       DATASOURCE.USERNAME: postgres
       DATASOURCE.PASSWORD: postgres
     depends_on:
       - eureka-server
-      - postgres-db
+      - task-db
     networks:
       - task-network
 
+  # Notification Service (no DB needed)
   notification-service:
     build: ./notification-service
     container_name: notification-service
@@ -79,6 +100,7 @@ services:
     networks:
       - task-network
 
+  # Frontend
   frontend:
     build: ./frontend
     container_name: frontend
@@ -92,7 +114,8 @@ services:
       - task-network
 
 volumes:
-  postgres-data:
+  user-data:
+  task-data:
 
 networks:
   task-network:
