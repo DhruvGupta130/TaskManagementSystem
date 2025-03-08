@@ -1,14 +1,14 @@
-# Use an official OpenJDK runtime as a parent image
+# Use OpenJDK image
 FROM openjdk:23-jdk-slim
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy the built JAR file into the container
-COPY target/eureka-server-0.0.1-SNAPSHOT.jar app.jar
+# Copy the built jar file
+COPY target/eureka-server-0.0.1-SNAPSHOT.jar /app/eureka-server.jar
 
-# Expose the port the application runs on
-EXPOSE 8080
+# Expose port
+EXPOSE 8761
 
-# Run the JAR file
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the jar
+ENTRYPOINT ["java", "-jar", "/app/eureka-server.jar"]

@@ -1,34 +1,99 @@
 version: '3.8'
+
 services:
+  postgres-db:
+    image: postgres:16
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: taskdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+
   eureka-server:
     build: ./eureka-server
+    container_name: eureka-server
     ports:
       - "8761:8761"
+    networks:
+      - task-network
 
   api-gateway:
     build: ./api-gateway
+    container_name: api-gateway
     ports:
       - "8080:8080"
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka/
     depends_on:
       - eureka-server
+    networks:
+      - task-network
 
   user-service:
     build: ./user-service
+    container_name: user-service
     ports:
       - "8081:8081"
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka/
+      DATASOURCE.URL: jdbc:postgresql://postgres-db:5432/taskdb
+      DATASOURCE.USERNAME: postgres
+      DATASOURCE.PASSWORD: postgres
     depends_on:
       - eureka-server
+      - postgres-db
+    networks:
+      - task-network
 
   task-service:
     build: ./task-service
+    container_name: task-service
     ports:
       - "8082:8082"
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka/
+      DATASOURCE.URL: jdbc:postgresql://postgres-db:5432/taskdb
+      DATASOURCE.USERNAME: postgres
+      DATASOURCE.PASSWORD: postgres
     depends_on:
       - eureka-server
+      - postgres-db
+    networks:
+      - task-network
 
   notification-service:
     build: ./notification-service
+    container_name: notification-service
     ports:
       - "8083:8083"
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka/
     depends_on:
       - eureka-server
+    networks:
+      - task-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    environment:
+      REACT_APP_API_GATEWAY_URL: http://api-gateway:8080
+    depends_on:
+      - api-gateway
+    networks:
+      - task-network
+
+volumes:
+  postgres-data:
+
+networks:
+  task-network:
+    driver: bridge

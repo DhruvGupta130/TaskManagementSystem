@@ -33,6 +33,12 @@ const ManagerDashboard = () => {
                 📊 Manager Dashboard
             </h2>
 
+            {error && (
+                <div className="bg-red-100 text-red-700 border border-red-400 p-3 rounded-md mb-4 text-center">
+                    {error}
+                </div>
+            )}
+
             {tasks.length === 0 ? (
                 <p className="text-center text-gray-500 text-lg">No tasks available.</p>
             ) : (
