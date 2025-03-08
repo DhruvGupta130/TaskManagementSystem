@@ -28,7 +28,7 @@ const CreateUser = () => {
         setSuccess("");
 
         try {
-            const response = await createUser(newUser, authUser?.token);
+            await createUser(newUser, authUser?.token);
             setSuccess("User created successfully!");
             setTimeout(() => navigate("/admin/users"), 1500);
         } catch (err) {
