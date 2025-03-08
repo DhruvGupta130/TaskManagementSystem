@@ -16,6 +16,7 @@ import EditTask from "./management/pages/EditTask.jsx";
 import EditUser from "./management/pages/EditUser.jsx";
 import CreateUser from "./management/pages/CreateUser.jsx";
 import AdminSettings from "./management/pages/AdminSettings.jsx";
+import ManagerPanel from "./management/pages/ManagerPanel.jsx";
 
 const App = () => (
     <AuthProvider>
@@ -26,7 +27,7 @@ const App = () => (
                 <Route path="/register" element={<Register />} />
                 <Route path="/logout" element={<Logout />} />
                 <Route path="/dashboard" element={
-                    <ProtectedRoute role={["USER", "ADMIN"]} >
+                    <ProtectedRoute role={["USER", "ADMIN", "MANAGER"]} >
                         <Dashboard />
                     </ProtectedRoute>
                 } />
@@ -81,6 +82,12 @@ const App = () => (
                 <Route path="/admin/settings" element={
                     <ProtectedRoute role={["ADMIN"]}>
                         <AdminSettings />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/manager" element={
+                    <ProtectedRoute role={["MANAGER"]}>
+                        <ManagerPanel />
                     </ProtectedRoute>
                 } />
 

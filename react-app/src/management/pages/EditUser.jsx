@@ -99,6 +99,7 @@ const EditUser = () => {
                                 required
                             >
                                 <option value="USER">User</option>
+                                <option value="MANAGER">Manager</option>
                                 <option value="ADMIN">Admin</option>
                             </select>
                         </div>

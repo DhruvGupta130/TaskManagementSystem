@@ -11,4 +11,6 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
     List<Task> findByAssigneeId(long assigneeId);
 
     List<Task> findByDueDateBeforeAndCompletedFalse(LocalDateTime now);
+
+    List<Task> findByManagerId(Long managerId);
 }

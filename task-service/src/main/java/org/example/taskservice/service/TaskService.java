@@ -52,12 +52,20 @@ public class TaskService {
         try {
             User user = userClient.getUserDetails(token);
             task.setAssigneeId(user.getId());
+            task.setLastUpdated(LocalDateTime.now());
         } catch (Exception e) {
             throw new ResourceNotFoundException("Assignee not found");
         }
         Task savedTask = taskRepository.save(task);
         sendTaskNotification(savedTask, "New task assigned: " + savedTask.getTitle());
         return savedTask;
+    }
+
+    @Transactional
+    public Task assignTask(Task task) {
+        task.setLastUpdated(LocalDateTime.now());
+        sendTaskNotification(task, "New task assigned: " + task.getTitle());
+        return taskRepository.save(task);
     }
 
     @Transactional
@@ -71,6 +79,7 @@ public class TaskService {
         task.setAssigneeId(taskDetails.getAssigneeId());
         task.setPriority(taskDetails.getPriority());
         task.setDueDate(taskDetails.getDueDate());
+        task.setLastUpdated(LocalDateTime.now());
         task.setCompleted(taskDetails.isCompleted());
 
         sendTaskNotification(task, "Task updated: " + task.getTitle());
@@ -97,6 +106,10 @@ public class TaskService {
     public void sendTaskNotification(Task task, String message) {
         Notifications notification = createNotification(task, message);
         notificationClient.sendNotification(notification);
+    }
+
+    public List<Task> getTasksByManager(Long managerId) {
+        return taskRepository.findByManagerId(managerId);
     }
 
     private Notifications createNotification(Task task, String message) {

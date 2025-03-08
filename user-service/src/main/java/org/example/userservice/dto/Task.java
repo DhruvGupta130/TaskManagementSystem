@@ -14,8 +14,8 @@ public class Task {
     private String title;
     private String description;
     private String priority;
-    private String status;
     private boolean completed;
+    private boolean overdue;
     private LocalDateTime lastUpdated;
     private LocalDateTime dueDate;
 }

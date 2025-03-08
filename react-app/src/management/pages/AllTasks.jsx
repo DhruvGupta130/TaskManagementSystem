@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Edit, Trash2, Search, Loader2 } from "lucide-react";
-import { getAllTasks, deleteTask, getTaskUser } from "../../services/api.js";
+import { getAllTasks, deleteTask } from "../../services/api.js";
 import { useAuth } from "../../context/useAuth.jsx";
 import {DateTime} from "../../services/DateTime.js";
+import {handleFetchUser} from "../../services/helper.js";
 
 const AllTasks = () => {
     const { user } = useAuth();
@@ -77,21 +78,6 @@ const AllTasks = () => {
         }
     };
 
-    const handleFetchUser = async (taskId) => {
-        try {
-            setUserLoading(true);
-            setError("");
-            const response = await getTaskUser(taskId, user?.token);
-            setUserDetails(response.data);
-            console.log(response.data);
-        } catch (err) {
-            console.error(err);
-            setError("Failed to fetch user details.");
-        } finally {
-            setUserLoading(false);
-        }
-    };
-
     const closeUserModal = () => {
         setUserDetails(null);
     };
@@ -142,14 +128,14 @@ const AllTasks = () => {
                                     {task.priority}
                                 </td>
                                 <td className={`py-3 px-4 ${task.completed ? "text-green-500" : "text-blue-500"}`}>
-                                    {task.completed ? "✔️ COMPLETED" : "🕛 PENDING"}
+                                    {task.completed ? "✔️ COMPLETED" : "🕛 IN PROGRESS"}
                                 </td>
                                 <td>
                                     <button
-                                        onClick={() => handleFetchUser(task.id)}
-                                        className="text-blue-500 hover:text-blue-700 underline"
+                                        onClick={() => handleFetchUser(task.id, user, setError, setUserLoading, setUserDetails)}
+                                        className="text-blue-500 hover:text-blue-700 underline font-medium transition-colors duration-200 ease-in-out"
                                     >
-                                        View User
+                                        🔍 View User
                                     </button>
                                 </td>
                                 <td className="py-3 px-4 flex justify-center space-x-4">

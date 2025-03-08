@@ -17,13 +17,23 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<List<Task>> getAllTasks() {
+        return ResponseEntity.ok(taskService.getAllTasks());
     }
 
     @PostMapping
-    public Task createTask(@RequestHeader("Authorization") String token ,@RequestBody Task task) {
-        return taskService.createTask(task, token);
+    public ResponseEntity<Task> createTask(@RequestHeader("Authorization") String token ,@RequestBody Task task) {
+        return ResponseEntity.ok(taskService.createTask(task, token));
+    }
+
+    @PostMapping("/assign-task")
+    public ResponseEntity<Task> assignTask(@RequestBody Task task) {
+        return ResponseEntity.ok(taskService.assignTask(task));
+    }
+
+    @GetMapping("/manager/{managerId}")
+    public ResponseEntity<List<Task>> getTasksByManager(@PathVariable long managerId) {
+        return ResponseEntity.ok(taskService.getTasksByManager(managerId));
     }
 
     @GetMapping("/{userId}")

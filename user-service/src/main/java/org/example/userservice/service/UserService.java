@@ -2,6 +2,8 @@ package org.example.userservice.service;
 
 import lombok.AllArgsConstructor;
 import org.example.userservice.client.TaskClient;
+import org.example.userservice.dto.Task;
+import org.example.userservice.dto.TaskAssignmentRequest;
 import org.example.userservice.dto.UserDTO;
 import org.example.userservice.model.LoginUser;
 import org.example.userservice.repository.UserRepo;
@@ -81,7 +83,6 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    // Fetch all regular users (users with role USER)
     public List<UserDTO> getAllRegularUsers() {
         return userRepository.findByRole(LoginUser.Role.USER).stream().map(this::mapToUserDTO).toList();
     }
@@ -111,5 +112,13 @@ public class UserService {
     // Map LoginUser entity to UserDTO
     private UserDTO mapToUserDTO(LoginUser user) {
         return new UserDTO(user.getId(), user.getUsername(), user.getRole().name(), user.getName());
+    }
+
+    public Task assignTask(TaskAssignmentRequest request) {
+        return taskClient.assignTask(request);
+    }
+
+    public List<Task> getTasksByManager(long managerId) {
+        return taskClient.getTasksByManager(managerId);
     }
 }

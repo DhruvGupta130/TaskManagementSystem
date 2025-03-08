@@ -1,8 +1,9 @@
 package org.example.userservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.userservice.dto.Task;
+import org.example.userservice.dto.TaskAssignmentRequest;
 import org.example.userservice.dto.UserDTO;
-import org.example.userservice.model.LoginUser;
 import org.example.userservice.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +18,20 @@ public class ManagerController {
     private final UserService userService;
 
     @GetMapping("/users")
-    public List<UserDTO> getManagedUsers() {
-        return userService.getAllRegularUsers();
+    public ResponseEntity<List<UserDTO>> getManagedUsers() {
+        return ResponseEntity.ok(userService.getAllRegularUsers());
     }
 
-    @PutMapping("/users/{userId}")
-    public UserDTO updateUser(@PathVariable long userId, @RequestBody LoginUser updatedUser) {
-        return userService.updateRegularUser(userId, updatedUser);
+    @GetMapping("/tasks")
+    public ResponseEntity<List<Task>> getTasks(@RequestParam long managerId) {
+        List<Task> tasks = userService.getTasksByManager(managerId);
+        return ResponseEntity.ok(tasks);
+    }
+
+    @PostMapping("/assign-task")
+    public ResponseEntity<Task> assignTask(@RequestBody TaskAssignmentRequest request) {
+        Task assignedTask = userService.assignTask(request);
+        return ResponseEntity.ok(assignedTask);
     }
 
     @DeleteMapping("/users/{userId}")

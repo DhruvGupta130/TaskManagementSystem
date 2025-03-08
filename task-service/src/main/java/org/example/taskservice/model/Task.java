@@ -19,10 +19,14 @@ public class Task {
     @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
     private long assigneeId;
+
+    @Column(nullable = false)
+    private long managerId;
 
     @Enumerated(EnumType.STRING)
     private Priority priority;
@@ -30,8 +34,10 @@ public class Task {
     private boolean completed;
     private boolean overdue;
 
+    @Column(nullable = false)
     private LocalDateTime lastUpdated;
 
+    @Column(nullable = false)
     @Future(message = "Due date should always be in future")
     private LocalDateTime dueDate;
 
