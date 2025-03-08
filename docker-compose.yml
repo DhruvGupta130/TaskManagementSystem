@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Database for User Service
   user-db:
-    image: postgres:16
+    image: postgres:latest
     container_name: user-db
     environment:
       POSTGRES_USER: postgres
@@ -15,10 +15,14 @@ services:
       - user-data:/var/lib/postgresql/data
     networks:
       - task-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "userdb"]
+      interval: 10s
+      retries: 5
 
   # Database for Task Service
   task-db:
-    image: postgres:16
+    image: postgres:latest
     container_name: task-db
     environment:
       POSTGRES_USER: postgres
@@ -30,6 +34,29 @@ services:
       - task-data:/var/lib/postgresql/data
     networks:
       - task-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "taskdb"]
+      interval: 10s
+      retries: 5
+
+  # Database for Notification Service
+  notification-db:
+    image: postgres:latest
+    container_name: notification-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: notify
+    ports:
+      - "5435:5432"
+    volumes:
+      - notification-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "notify"]
+      interval: 10s
+      retries: 5
 
   # Eureka Server
   eureka-server:
@@ -37,6 +64,25 @@ services:
     container_name: eureka-server
     ports:
       - "8761:8761"
+    networks:
+      - task-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/health"]
+      interval: 30s
+      retries: 5
+
+  # Spring Boot Admin Server
+  admin-server:
+    build: ./admin-server
+    container_name: admin-server
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_PROFILES_ACTIVE: "docker"
+      EUREKA_URL: http://eureka-server:8761/eureka/
+      HOSTNAME: admin-server
+    depends_on:
+      - eureka-server
     networks:
       - task-network
 
@@ -48,8 +94,15 @@ services:
       - "8080:8080"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
+      HOSTNAME: api-gateway
+      ADMIN_URL: http://admin-server:9090
+      FRONTEND_URL: http://frontend:5173
     depends_on:
       - eureka-server
+      - admin-server
+      - user-service
+      - notification-service
+      - task-service
     networks:
       - task-network
 
@@ -64,9 +117,12 @@ services:
       DATASOURCE.URL: jdbc:postgresql://user-db:5432/userdb
       DATASOURCE.USERNAME: postgres
       DATASOURCE.PASSWORD: postgres
+      HOSTNAME: user-service
+      ADMIN_URL: http://admin-server:9090
     depends_on:
       - eureka-server
       - user-db
+      - admin-server
     networks:
       - task-network
 
@@ -81,13 +137,16 @@ services:
       DATASOURCE.URL: jdbc:postgresql://task-db:5432/taskdb
       DATASOURCE.USERNAME: postgres
       DATASOURCE.PASSWORD: postgres
+      HOSTNAME: task-service
+      ADMIN_URL: http://localhost:9090
     depends_on:
       - eureka-server
       - task-db
+      - admin-server
     networks:
       - task-network
 
-  # Notification Service (no DB needed)
+  # Notification Service
   notification-service:
     build: ./notification-service
     container_name: notification-service
@@ -95,14 +154,21 @@ services:
       - "8083:8083"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
+      DATASOURCE.URL: jdbc:postgresql://notification-db:5432/notify
+      DATASOURCE.USERNAME: postgres
+      DATASOURCE.PASSWORD: postgres
+      HOSTNAME: notification-service
+      ADMIN_URL: http://admin-server:9090
     depends_on:
       - eureka-server
+      - notification-db
+      - admin-server
     networks:
       - task-network
 
   # Frontend
   frontend:
-    build: ./frontend
+    build: ./react-app
     container_name: frontend
     ports:
       - "5173:5173"
@@ -116,6 +182,7 @@ services:
 volumes:
   user-data:
   task-data:
+  notification-data:
 
 networks:
   task-network:
