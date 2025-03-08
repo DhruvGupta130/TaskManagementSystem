@@ -171,7 +171,7 @@ This project is licensed under the MIT License.
 ## 💬 Contact
 For questions or suggestions, feel free to reach out:
 - **Email:** dhruvgupta130@gmail.com
-- **LinkedIn:** [Your LinkedIn](https://www.linkedin.com/in/dhruvgupta130)
+- **LinkedIn:** [Dhruv Gupta](https://www.linkedin.com/in/dhruvgupta130)
 
 ---
 
