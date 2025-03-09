@@ -33,7 +33,7 @@ const Login = () => {
             navigate("/dashboard");
         } catch (error) {
             console.error("Login failed", error);
-            setError(error?.response?.data?.message || "Invalid email or password");
+            setError(error?.response?.data?.message || "Error when logging in");
         } finally {
             setIsLoading(false);
         }

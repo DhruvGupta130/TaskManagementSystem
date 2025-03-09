@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Database for User Service
   user-db:
@@ -54,6 +52,7 @@ services:
       - "8761:8761"
     networks:
       - task-network
+    restart: always
 
   # Spring Boot Admin Server
   admin-server:
@@ -79,8 +78,8 @@ services:
       EUREKA_URL: http://eureka-server:8761/eureka/
       HOSTNAME: api-gateway
       ADMIN_URL: http://admin-server:9090
-      FRONTEND_URL: http://frontend:5173
-      SERVICE_URL: http://api-gateway:8080
+      FRONTEND_URL: http://localhost:5173/
+      GATEWAY_SERVICE_URL: http://api-gateway:8080
     depends_on:
       - eureka-server
       - admin-server
@@ -103,7 +102,7 @@ services:
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: user-service
       ADMIN_URL: http://admin-server:9090
-      SERVICE_URL: http://user-service:8081
+      USER_SERVICE_URL: http://user-service:8081
     depends_on:
       - eureka-server
       - user-db
@@ -124,7 +123,7 @@ services:
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: task-service
       ADMIN_URL: http://admin-server:9090
-      SERVICE_URL: http://task-service:8082
+      TASK_SERVICE_URL: http://task-service:8082
     depends_on:
       - eureka-server
       - task-db
@@ -145,7 +144,7 @@ services:
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: notification-service
       ADMIN_URL: http://admin-server:9090
-      SERVICE_URL: http://notification-service:8083
+      NOTIFICATION_SERVICE_URL: http://notification-service:8083
     depends_on:
       - eureka-server
       - notification-db
