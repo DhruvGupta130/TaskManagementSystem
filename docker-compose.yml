@@ -62,10 +62,8 @@ services:
     ports:
       - "9090:9090"
     environment:
-      SPRING_PROFILES_ACTIVE: "docker"
       EUREKA_URL: http://eureka-server:8761/eureka/
       HOSTNAME: admin-server
-      SERVICE_URL: http://admin-server:9090
     depends_on:
       - eureka-server
     networks:
@@ -125,7 +123,7 @@ services:
       DATASOURCE.USERNAME: postgres
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: task-service
-      ADMIN_URL: http://localhost:9090
+      ADMIN_URL: http://admin-server:9090
       SERVICE_URL: http://task-service:8082
     depends_on:
       - eureka-server
@@ -162,7 +160,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_GATEWAY_URL=http://api-gateway:8080
+      VITE_API_GATEWAY_URL: http://localhost:8080
     depends_on:
       - api-gateway
     networks:
