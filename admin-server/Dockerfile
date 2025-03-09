@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/admin-server-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port the application runs on
-EXPOSE 9090
+EXPOSE 10000
 
 # Run the JAR file
 ENTRYPOINT ["java", "-jar", "app.jar"]

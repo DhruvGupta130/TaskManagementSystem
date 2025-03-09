@@ -15,10 +15,6 @@ services:
       - user-data:/var/lib/postgresql/data
     networks:
       - task-network
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "userdb"]
-      interval: 10s
-      retries: 5
 
   # Database for Task Service
   task-db:
@@ -34,10 +30,6 @@ services:
       - task-data:/var/lib/postgresql/data
     networks:
       - task-network
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "taskdb"]
-      interval: 10s
-      retries: 5
 
   # Database for Notification Service
   notification-db:
@@ -53,10 +45,6 @@ services:
       - notification-data:/var/lib/postgresql/data
     networks:
       - task-network
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "notify"]
-      interval: 10s
-      retries: 5
 
   # Eureka Server
   eureka-server:
@@ -66,10 +54,6 @@ services:
       - "8761:8761"
     networks:
       - task-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/health"]
-      interval: 30s
-      retries: 5
 
   # Spring Boot Admin Server
   admin-server:
@@ -81,6 +65,7 @@ services:
       SPRING_PROFILES_ACTIVE: "docker"
       EUREKA_URL: http://eureka-server:8761/eureka/
       HOSTNAME: admin-server
+      SERVICE_URL: http://admin-server:9090
     depends_on:
       - eureka-server
     networks:
@@ -97,6 +82,7 @@ services:
       HOSTNAME: api-gateway
       ADMIN_URL: http://admin-server:9090
       FRONTEND_URL: http://frontend:5173
+      SERVICE_URL: http://api-gateway:8080
     depends_on:
       - eureka-server
       - admin-server
@@ -119,6 +105,7 @@ services:
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: user-service
       ADMIN_URL: http://admin-server:9090
+      SERVICE_URL: http://user-service:8081
     depends_on:
       - eureka-server
       - user-db
@@ -139,6 +126,7 @@ services:
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: task-service
       ADMIN_URL: http://localhost:9090
+      SERVICE_URL: http://task-service:8082
     depends_on:
       - eureka-server
       - task-db
@@ -159,6 +147,7 @@ services:
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: notification-service
       ADMIN_URL: http://admin-server:9090
+      SERVICE_URL: http://notification-service:8083
     depends_on:
       - eureka-server
       - notification-db
@@ -173,7 +162,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      REACT_APP_API_GATEWAY_URL: http://api-gateway:8080
+      - VITE_API_GATEWAY_URL=http://api-gateway:8080
     depends_on:
       - api-gateway
     networks:

@@ -1,6 +1,7 @@
 import axios from "axios";
+import {BASE_URL} from "./config.js";
 
-const SERVICE_URL = "http://localhost:8080/api";
+const SERVICE_URL = `${BASE_URL}/api`;
 const MANAGER_SERVICE_URL = `${SERVICE_URL}/users/manager`;
 
 export const getManagerTasks = async (managerId, token) => {
