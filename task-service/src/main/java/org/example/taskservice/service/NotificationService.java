@@ -1,6 +1,7 @@
 package org.example.taskservice.service;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,13 +33,14 @@ public class NotificationService {
 
     @CircuitBreaker(name = "notificationServiceCB", fallbackMethod = "notificationServiceFallback")
     @Retry(name = "notificationRetry", fallbackMethod = "notificationServiceFallback")
+    @RateLimiter(name = "notificationRateLimiter", fallbackMethod = "notificationServiceFallback")
     public void sendTaskNotification(Task task, String message) {
         Notifications notification = createNotification(task, message);
         notificationClient.sendNotification(notification);
     }
 
     public void notificationServiceFallback(Task task, String message, Throwable t) {
-        log.warn("Notification service unavailable. Failed to send: {} for task: {}", message, task.getTitle());
+        log.warn("Notification service unavailable. Failed to send: {} for task: {}. Error: {}", message, task.getTitle(), t.getMessage());
         FailedNotification failedNotification = new FailedNotification();
         failedNotification.setRecipientId(task.getAssigneeId());
         failedNotification.setMessage(message);
