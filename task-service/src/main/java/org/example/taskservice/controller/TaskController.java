@@ -67,4 +67,9 @@ public class TaskController {
         taskService.deleteTask(taskId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/overdue")
+    public ResponseEntity<List<Task>> getOverdueTasks() {
+        return ResponseEntity.ok(taskService.getOverdueTasks());
+    }
 }

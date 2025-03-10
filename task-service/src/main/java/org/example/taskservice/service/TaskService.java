@@ -1,12 +1,8 @@
 package org.example.taskservice.service;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.taskservice.client.NotificationClient;
 import org.example.taskservice.client.UserClient;
-import org.example.taskservice.dto.Notifications;
 import org.example.taskservice.dto.User;
 import org.example.taskservice.exception.ResourceNotFoundException;
 import org.example.taskservice.model.Task;
@@ -23,8 +19,8 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepo taskRepository;
-    private final NotificationClient notificationClient;
     private final UserClient userClient;
+    private final NotificationService notificationService;
 
     public List<Task> getAllTasks() {
         log.info("Fetching all tasks");
@@ -57,14 +53,14 @@ public class TaskService {
             throw new ResourceNotFoundException("Assignee not found");
         }
         Task savedTask = taskRepository.save(task);
-        sendTaskNotification(savedTask, "New task assigned: " + savedTask.getTitle());
+        notificationService.sendTaskNotification(savedTask, "New task assigned: " + savedTask.getTitle());
         return savedTask;
     }
 
     @Transactional
     public Task assignTask(Task task) {
         task.setLastUpdated(LocalDateTime.now());
-        sendTaskNotification(task, "New task assigned: " + task.getTitle());
+        notificationService.sendTaskNotification(task, "New task assigned: " + task.getTitle());
         return taskRepository.save(task);
     }
 
@@ -82,7 +78,7 @@ public class TaskService {
         task.setLastUpdated(LocalDateTime.now());
         task.setCompleted(taskDetails.isCompleted());
 
-        sendTaskNotification(task, "Task updated: " + task.getTitle());
+        notificationService.sendTaskNotification(task, "Task updated: " + task.getTitle());
 
         return taskRepository.save(task);
     }
@@ -97,36 +93,17 @@ public class TaskService {
     public void deleteTask(Long taskId) {
         log.info("Deleting task with ID: {}", taskId);
         Task task = getTaskById(taskId, null);
-        sendTaskNotification(task, "Task deleted: " + task.getTitle());
+        notificationService.sendTaskNotification(task, "Task deleted: " + task.getTitle());
         taskRepository.deleteById(taskId);
-    }
-
-    @CircuitBreaker(name = "notificationServiceCB", fallbackMethod = "notificationFallback")
-    @Retry(name = "notificationRetry", fallbackMethod = "notificationFallback")
-    public void sendTaskNotification(Task task, String message) {
-        Notifications notification = createNotification(task, message);
-        notificationClient.sendNotification(notification);
     }
 
     public List<Task> getTasksByManager(Long managerId) {
         return taskRepository.findByManagerId(managerId);
     }
 
-    private Notifications createNotification(Task task, String message) {
-        Notifications notification = new Notifications();
-        notification.setMessage(message);
-        notification.setRecipientId(task.getAssigneeId());
-        notification.setRead(false);
-        notification.setTimestamp(LocalDateTime.now());
-        return notification;
-    }
-
-    public void notificationFallback(Task task, String message, Throwable t) {
-        log.error("Notification service unavailable. Failed to send: {} for task: {}", message, task.getTitle(), t);
-    }
-
     public List<Task> getOverdueTasks() {
         log.info("Fetching overdue tasks");
         return taskRepository.findByDueDateBeforeAndCompletedFalse(LocalDateTime.now());
     }
+
 }
