@@ -169,7 +169,7 @@ If you don’t have PostgreSQL set up, use Docker to start a PostgreSQL containe
 ```
 
 ## 📄 License
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE.txt).
 
 ## 💬 Contact
 For questions or suggestions, feel free to reach out:
