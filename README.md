@@ -151,7 +151,7 @@ The Task Management System is a robust and scalable web application built on a m
 | /api/notifications/{userId}   | GET    | Get user notifications  |
 
 ## 🧑‍💻 Contribution Guidelines
-We welcome contributions! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
+We welcome feedback and suggestions to help shape its direction. Contributions at this stage are focused on ideas and suggestions that could enhance the project's functionality. Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
 1. Fork the repository.
 2. Make your changes.
 3. Submit a pull request.
