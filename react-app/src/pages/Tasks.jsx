@@ -100,7 +100,6 @@ const Tasks = () => {
                                             className={`px-3 py-1 rounded-full text-white ${task.completed ? 'bg-blue-500' : 'bg-orange-500'}`}
                                         >
                                           {task.completed ? '✔ Completed' : '⌛ In Progress'}
-                                          {task.completed ? '✔ Completed' : '⌛ In Progress'}
                                         </span>
                                     </div>
                                     <p className="text-gray-700 text-md">{task.description}</p>

@@ -75,6 +75,22 @@ const Register = () => {
                             required
                         />
                     </div>
+                    {/* Role Field */}
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">User Role</label>
+                        <select
+                            name="role"
+                            value={formData.role}
+                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
+                            required
+                        >
+                            <option value="USER">User</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="ADMIN">Admin</option>
+                        </select>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={isLoading}

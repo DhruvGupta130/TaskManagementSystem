@@ -51,6 +51,14 @@ const TaskAssignment = () => {
             return;
         }
 
+        const oneHourFromNow = new Date();
+        oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
+
+        if (new Date(dueDate) < oneHourFromNow) {
+            setError("Due date must be at least 1 hour in the future");
+            return;
+        }
+
         const task = {
             managerId: user.id,
             assigneeId,
