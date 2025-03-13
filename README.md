@@ -151,7 +151,10 @@ The Task Management System is a robust and scalable web application built on a m
 | /api/notifications/{userId}   | GET    | Get user notifications  |
 
 ## 🧑‍💻 Contribution Guidelines
-We welcome contributions! Please fork the repository and create a pull request.
+We welcome feedback and suggestions to help shape its direction. Contributions at this stage are focused on ideas and suggestions that could enhance the project's functionality. Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
+1. Fork the repository.
+2. Make your changes.
+3. Submit a pull request.
 
 ## 🐛 Known Issues
 - Real-time notifications need WebSocket integration.
@@ -166,7 +169,7 @@ If you don’t have PostgreSQL set up, use Docker to start a PostgreSQL containe
 ```
 
 ## 📄 License
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE.txt).
 
 ## 💬 Contact
 For questions or suggestions, feel free to reach out:
