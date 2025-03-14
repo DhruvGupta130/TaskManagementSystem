@@ -4,9 +4,9 @@ import {BASE_URL} from "./config.js";
 const SERVICE_URL = `${BASE_URL}/api`;
 const MANAGER_SERVICE_URL = `${SERVICE_URL}/users/manager`;
 
-export const getManagerTasks = async (managerId, token) => {
+export const getManagerTasks = async (token) => {
     try {
-        const response = await axios.get(`${SERVICE_URL}/tasks/manager/${managerId}`, {
+        const response = await axios.get(`${SERVICE_URL}/tasks/manager`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

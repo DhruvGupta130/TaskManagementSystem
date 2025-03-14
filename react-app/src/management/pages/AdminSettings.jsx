@@ -39,7 +39,6 @@ const AdminSettings = () => {
                 return;
             }
             const response = await updatePassword(formData.password, user.token);
-            console.log(response);
             setSuccess("Password updated successfully!");
             setTimeout(() => navigate("/"), 2000);
         } catch (err) {

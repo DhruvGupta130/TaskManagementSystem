@@ -91,6 +91,12 @@ const App = () => (
                     </ProtectedRoute>
                 } />
 
+                <Route path="/manager/tasks/edit/:id" element={
+                    <ProtectedRoute role={["MANAGER"]}>
+                        <EditTask />
+                    </ProtectedRoute>
+                } />
+
                 <Route path="/not-authorized" element={<NotAuthorized />} />
 
             </Route>

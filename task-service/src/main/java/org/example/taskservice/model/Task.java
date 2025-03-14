@@ -41,6 +41,9 @@ public class Task {
     @Future(message = "Due date should always be in future")
     private LocalDateTime dueDate;
 
+    @OneToOne(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private TaskExtension extension;
+
     public boolean isOverdue() {
         return dueDate.isBefore(LocalDateTime.now());
     }

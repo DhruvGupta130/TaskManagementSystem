@@ -12,7 +12,8 @@ const EditTask = () => {
         title: "",
         description: "",
         priority: "LOW",
-        completed: false
+        completed: false,
+        dueDate: ""
     });
 
     const [loading, setLoading] = useState(false);
@@ -23,7 +24,14 @@ const EditTask = () => {
         const fetchTask = async () => {
             try {
                 const response = await getTaskById(id, user?.token);
-                setTask(response.data);
+                const taskData = response.data;
+
+                // Formatting due date to match input[type=datetime-local]
+                const formattedDueDate = taskData.dueDate
+                    ? taskData.dueDate.replace(" ", "T")
+                    : "";
+
+                setTask({ ...taskData, dueDate: formattedDueDate });
             } catch (err) {
                 console.error(err);
                 setError("Failed to fetch task details.");
@@ -46,7 +54,7 @@ const EditTask = () => {
         try {
             await updateTask(id, task, user?.token);
             setSuccess("Task updated successfully!");
-            setTimeout(() => navigate("/admin/tasks"), 2000);
+            setTimeout(() => navigate("/"), 2000);
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || "Failed to update task.");
@@ -101,6 +109,17 @@ const EditTask = () => {
                         </select>
                     </div>
 
+                    <div className="mb-4">
+                        <label className="block text-gray-700 font-medium mb-2">Due Date</label>
+                        <input
+                            type="datetime-local"
+                            name="dueDate"
+                            value={task.dueDate}
+                            onChange={handleChange}
+                            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                        />
+                    </div>
+
                     <div className="mb-4 flex items-center">
                         <input
                             type="checkbox"
@@ -115,7 +134,7 @@ const EditTask = () => {
                     <div className="flex justify-between">
                         <button
                             type="button"
-                            onClick={() => navigate("/admin/tasks")}
+                            onClick={() => navigate("/")}
                             className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition"
                         >
                             Cancel

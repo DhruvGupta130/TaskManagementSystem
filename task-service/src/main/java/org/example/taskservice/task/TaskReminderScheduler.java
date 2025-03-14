@@ -51,7 +51,7 @@ public class TaskReminderScheduler {
     @Scheduled(fixedRate = 60000)
     public void updateOverdueTasks() {
         log.info("Checking for overdue tasks");
-        List<Task> overdueTasks = taskRepository.findByDueDateBeforeAndCompletedFalse(LocalDateTime.now());
+        List<Task> overdueTasks = taskRepository.findByDueDateBeforeAndCompleted(LocalDateTime.now(), false);
         for (Task task : overdueTasks) {
             if (!task.isOverdue()) {
                 task.setOverdue(true);

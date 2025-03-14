@@ -23,14 +23,14 @@ public class ManagerController {
     }
 
     @GetMapping("/tasks")
-    public ResponseEntity<List<Task>> getTasks(@RequestParam long managerId) {
-        List<Task> tasks = userService.getTasksByManager(managerId);
+    public ResponseEntity<List<Task>> getTasks(@RequestHeader("Authorization") String token) {
+        List<Task> tasks = userService.getTasksByManager(token);
         return ResponseEntity.ok(tasks);
     }
 
     @PostMapping("/assign-task")
-    public ResponseEntity<Task> assignTask(@RequestBody TaskAssignmentRequest request) {
-        Task assignedTask = userService.assignTask(request);
+    public ResponseEntity<Task> assignTask(@RequestHeader String token, @RequestBody TaskAssignmentRequest request) {
+        Task assignedTask = userService.assignTask(request, token);
         return ResponseEntity.ok(assignedTask);
     }
 

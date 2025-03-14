@@ -27,8 +27,8 @@ public class UserController {
     }
 
     @GetMapping("/{username}/tasks")
-    public List<?> getUserWithTasks(@PathVariable String username) {
-        return userService.getUserWithTasks(username);
+    public List<?> getUserWithTasks(@RequestHeader("Authorization") String token, @PathVariable String username) {
+        return userService.getUserWithTasks(username, token);
     }
 
     @GetMapping("/me")

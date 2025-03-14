@@ -13,7 +13,7 @@ const ManagerPanel = () => {
             </h1>
 
             {/* Tab Navigation */}
-            <div className="bg-white shadow-lg rounded-2xl flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 mb-10 p-3 w-full max-w-md sm:max-w-lg">
+            <div className="bg-white shadow-lg rounded-2xl flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 mb-10 p-3 w-full max-w-full sm:max-w-lg">
                 <button
                     onClick={() => setActiveTab("dashboard")}
                     className={`w-full px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 ${
@@ -37,7 +37,7 @@ const ManagerPanel = () => {
             </div>
 
             {/* Content */}
-            <div className="w-full max-w-full sm:max-w-4xl bg-white rounded-3xl shadow-2xl p-6 sm:p-10 transition-all duration-500">
+            <div className="w-full max-w-full sm:max-w-full bg-white rounded-3xl shadow-2xl p-6 sm:p-10 transition-all duration-500">
                 {activeTab === "dashboard" && <ManagerDashboard />}
                 {activeTab === "assign" && <TaskAssignment />}
             </div>

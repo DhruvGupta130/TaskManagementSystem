@@ -5,6 +5,7 @@ import { getAllTasks, deleteTask } from "../../services/api.js";
 import { useAuth } from "../../context/useAuth.jsx";
 import {DateTime} from "../../services/DateTime.js";
 import {handleFetchUser} from "../../services/helper.js";
+import {FaSpinner} from "react-icons/fa";
 
 const AllTasks = () => {
     const { user } = useAuth();
@@ -13,12 +14,14 @@ const AllTasks = () => {
     const [filteredTasks, setFilteredTasks] = useState([]);
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
     const [deleteLoading, setDeleteLoading] = useState(null);
     const [userDetails, setUserDetails] = useState(null);
     const [userLoading, setUserLoading] = useState(false);
 
     const fetchTasks = useCallback(async () => {
         if (user && (user.role === "ADMIN" || user.role === "MANAGER")) {
+            setLoading(true);
             try {
                 const response = await getAllTasks(user?.token);
                 setTasks(response.data);
@@ -26,6 +29,8 @@ const AllTasks = () => {
             } catch (error) {
                 console.error(error);
                 setError("Failed to fetch tasks.");
+            } finally {
+                setLoading(false);
             }
         }
     }, [user]);
@@ -103,9 +108,15 @@ const AllTasks = () => {
                 <Search className="absolute left-3 top-3 text-gray-500" size={20} />
             </div>
 
+            {loading && (
+                <div className="flex justify-center items-center py-4">
+                    <FaSpinner className="animate-spin text-blue-500 text-4xl" />
+                </div>
+            )}
+
             {/* AllTasks Table */}
             <div className="overflow-x-auto">
-                <table className="w-full bg-white rounded-lg shadow-md">
+                {!loading && (<table className="w-full bg-white rounded-lg shadow-md">
                     <thead className="bg-blue-500 text-white">
                     <tr>
                         <th className="py-3 px-4 text-left">Due Date</th>
@@ -143,14 +154,15 @@ const AllTasks = () => {
                                         to={`/admin/tasks/edit/${task.id}`}
                                         className="text-green-500 hover:text-green-700 transition duration-200"
                                     >
-                                        <Edit size={20} />
+                                        <Edit size={20}/>
                                     </Link>
                                     <button
                                         onClick={() => handleDelete(task.id)}
                                         className={`text-red-500 hover:text-red-700 transition duration-200 ${deleteLoading === task.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         disabled={deleteLoading === task.id}
                                     >
-                                        {deleteLoading === task.id ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={20} />}
+                                        {deleteLoading === task.id ? <Loader2 className="animate-spin" size={20}/> :
+                                            <Trash2 size={20}/>}
                                     </button>
                                 </td>
                             </tr>
@@ -163,7 +175,7 @@ const AllTasks = () => {
                         </tr>
                     )}
                     </tbody>
-                </table>
+                </table>)}
             </div>
 
             {/* User Modal */}

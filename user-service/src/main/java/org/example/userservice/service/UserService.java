@@ -20,7 +20,6 @@ public class UserService {
     private final UserRepo userRepository;
     private final TaskClient taskClient;
     private final PasswordEncoder passwordEncoder;
-    private final AuthService authService;
 
     // Fetch user by username
     public UserDTO getUserByUsername(String username) {
@@ -37,10 +36,10 @@ public class UserService {
     }
 
     // Fetch user with their tasks
-    public List<?> getUserWithTasks(String username) {
+    public List<?> getUserWithTasks(String username, String token) {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
-        var tasks = taskClient.getTasksById(user.getId());
+        var tasks = taskClient.getTasksByUser(token);
         return List.of(user, tasks);
     }
 
@@ -76,21 +75,18 @@ public class UserService {
     // Delete user
     @Transactional
     public void deleteUser(long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new IllegalArgumentException("User with ID " + userId + " not found.");
+        LoginUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found."));
+        if(user.getRole().equals(LoginUser.Role.USER)){
+            taskClient.deleteUserTasks(userId);
+        } else if(user.getRole().equals(LoginUser.Role.MANAGER)) {
+            taskClient.deleteManagerTasks(userId);
         }
-        taskClient.deleteTasks(userId);
         userRepository.deleteById(userId);
     }
 
     public List<UserDTO> getAllRegularUsers() {
         return userRepository.findByRole(LoginUser.Role.USER).stream().map(this::mapToUserDTO).toList();
-    }
-
-    // Update regular user (only if role is USER)
-    public UserDTO updateRegularUser(long userId, LoginUser updatedUser) {
-        validateRegularUser(userId);
-        return updateUser(userId, updatedUser);
     }
 
     // Delete regular user (only if role is USER)
@@ -114,11 +110,11 @@ public class UserService {
         return new UserDTO(user.getId(), user.getUsername(), user.getRole().name(), user.getName());
     }
 
-    public Task assignTask(TaskAssignmentRequest request) {
-        return taskClient.assignTask(request);
+    public Task assignTask(TaskAssignmentRequest request, String token) {
+        return taskClient.assignTask(token, request);
     }
 
-    public List<Task> getTasksByManager(long managerId) {
-        return taskClient.getTasksByManager(managerId);
+    public List<Task> getTasksByManager(String token) {
+        return taskClient.getTasksByManager(token);
     }
 }

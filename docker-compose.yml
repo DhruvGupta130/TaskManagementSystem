@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: userdb
+      POSTGRES_DB: user-db
     ports:
       - "5433:5432"
     volumes:
@@ -21,7 +21,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: taskdb
+      POSTGRES_DB: task-db
     ports:
       - "5434:5432"
     volumes:
@@ -36,11 +36,26 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: notify
+      POSTGRES_DB: notify-db
     ports:
       - "5435:5432"
     volumes:
       - notification-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+
+  # Database for Comment Service
+  comment-db:
+    image: postgres:latest
+    container_name: comment-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: comment-db
+    ports:
+      - "5436:5432"
+    volumes:
+      - comment-data:/var/lib/postgresql/data
     networks:
       - task-network
 
@@ -86,6 +101,7 @@ services:
       - user-service
       - notification-service
       - task-service
+      - comment-service
     networks:
       - task-network
 
@@ -97,7 +113,7 @@ services:
       - "8081:8081"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://user-db:5432/userdb
+      DATASOURCE.URL: jdbc:postgresql://user-db:5432/user-db
       DATASOURCE.USERNAME: postgres
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: user-service
@@ -118,7 +134,7 @@ services:
       - "8082:8082"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://task-db:5432/taskdb
+      DATASOURCE.URL: jdbc:postgresql://task-db:5432/task-db
       DATASOURCE.USERNAME: postgres
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: task-service
@@ -140,7 +156,7 @@ services:
       - "8083:8083"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://notification-db:5432/notify
+      DATASOURCE.URL: jdbc:postgresql://notification-db:5432/notify-db
       DATASOURCE.USERNAME: postgres
       DATASOURCE.PASSWORD: postgres
       HOSTNAME: notification-service
@@ -153,10 +169,33 @@ services:
     networks:
       - task-network
 
+  comment-service:
+    build: ./comment-service
+    container_name: comment-service
+    ports:
+      - "8084:8084"
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka/
+      DATASOURCE.URL: jdbc:postgresql://comment-db:5432/comment-db
+      DATASOURCE.USERNAME: postgres
+      DATASOURCE.PASSWORD: postgres
+      HOSTNAME: comment-service
+      ADMIN_URL: http://admin-server:9090
+      COMMENT_SERVICE_URL: http://comment-service:8084
+    depends_on:
+      - eureka-server
+      - comment-db
+      - admin-server
+      - task-service
+      - user-service
+    networks:
+      - task-network
+
+
   # Frontend
-  frontend:
+  react-app:
     build: ./react-app
-    container_name: frontend
+    container_name: react-app
     ports:
       - "5173:5173"
     environment:
@@ -170,6 +209,7 @@ volumes:
   user-data:
   task-data:
   notification-data:
+  comment-data:
 
 networks:
   task-network:

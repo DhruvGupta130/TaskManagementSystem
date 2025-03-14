@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { assignTask, getAllUsers } from "../../services/managerApi.js";
 import { useAuth } from "../../context/useAuth.jsx";
+import {FaSpinner} from "react-icons/fa";
 
 const TaskAssignment = () => {
     const [title, setTitle] = useState("");
@@ -68,9 +69,8 @@ const TaskAssignment = () => {
             dueDate,
         };
         setAssignLoading(true);
-        console.log(task);
         try {
-            await assignTask(task);
+            await assignTask(task, user.token);
             setSuccess("Task assigned successfully!");
             setTitle("");
             setDescription("");
@@ -104,8 +104,8 @@ const TaskAssignment = () => {
             )}
 
             {loading ? (
-                <div className="text-center text-blue-500 text-lg font-medium animate-pulse">
-                    Loading users...
+                <div className="flex justify-center items-center py-4">
+                    <FaSpinner className="animate-spin text-blue-500 text-4xl" />
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
