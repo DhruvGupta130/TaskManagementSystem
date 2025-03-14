@@ -49,23 +49,40 @@ The Task Management System is a robust and scalable web application built on a m
                            |      API Gateway        |
                            +-----------+-------------+
                                        |
-        +------------------------------+----------------------------+
-        |                              |                            |
-+----------------+     +----------------------+       +----------------------+
-| User Service   |<--->|    Task Service      |<----->| Notification Service |
-+----------------+     +----------------------+       +----------------------+
+        +------------------------------+-----------------------------+
+        |                              |                             |
++----------------+       +----------------------+       +----------------------+
+| User Service   |<--+-->|    Task Service      |<----->| Notification Service |
++----------------+       +----------------------+       +----------------------+
+        |                         |      
+        |                         |     
+        |                 +------------------+    
+        + ----------------|  Comment Service |
+                          +------------------+    
+
 ```
-## 🏗️ Microservices Breakdown
-1. **User Service:**
-    - CRUD operations for users
-    - Authentication and Authorization
-    - Role management
-2. **Task Service:**
-    - CRUD operations for tasks
-    - Task assignment and prioritization
-3. **Notification Service:**
-    - Real-time task updates
-    - Deadline reminders
+Let’s add the **Comment Service** breakdown here! 📝
+
+---
+
+## 🏗️ Microservices Breakdown  
+1. **User Service:**  
+    - CRUD operations for users  
+    - Authentication and Authorization  
+    - Role management  
+
+2. **Task Service:**  
+    - CRUD operations for tasks  
+    - Task assignment and prioritization  
+
+3. **Notification Service:**  
+    - Real-time task updates  
+    - Deadline reminders  
+
+4. **Comment Service:** 🆕  
+    - CRUD operations for comments on tasks  
+    - Add comments to specific tasks  
+---
 
 ## 🏁 Getting Started
 ### 🚧 Prerequisites
@@ -128,6 +145,13 @@ The Task Management System is a robust and scalable web application built on a m
 │   │   ├── repositories
 │   │   ├── task
 │   ├── resources
+├── comment-service
+│   ├── src
+│   │   ├── controllers
+│   │   ├── model
+│   │   ├── services
+│   │   ├── repositories
+│   ├── resources
 ├── admin-server
 ├── api-gateway
 ├── eureka-server
@@ -141,14 +165,28 @@ The Task Management System is a robust and scalable web application built on a m
 │   ├── public
 ├── docker-compose.yml
 ```
+Let’s add the **Comment Service** API endpoints too! 📝  
+
+---
+
 ## 🧪 API Endpoints
-| Endpoint                      | Method | Description             |
-|-------------------------------|--------|-------------------------|
-| /api/users/register           | POST   | Register a new user     |
-| /api/users/login              | POST   | Authenticate user       |
-| /api/tasks/create             | POST   | Create a new task       |
-| /api/tasks/{id}               | GET    | Get task by ID          |
-| /api/notifications/{userId}   | GET    | Get user notifications  |
+
+| Endpoint                      | Method   | Description                 |  
+|-------------------------------|----------|-----------------------------|  
+| **User Service**              |          |                             |  
+| `/api/users/register`         | POST     | Register a new user         |  
+| `/api/users/login`            | POST     | Authenticate user           |
+| **Task Service**              |          |                             |  
+| `/api/tasks/create`           | POST     | Create a new task           |  
+| `/api/tasks/{id}`             | GET      | Get task by ID              |
+| **Notification Service**      |          |                             |  
+| `/api/notifications/{userId}` | GET      | Get user notifications      |
+| `/api/notifications`          | POST     | Send new notification       |
+| **Comment Service**           |          |                             |  
+| `/api/comments`               | POST     | Add a comment to a task     |  
+| `/api/comments/{taskId}`      | GET      | Get all comments for a task |
+
+---
 
 ## 🧑‍💻 Contribution Guidelines
 We welcome feedback and suggestions to help shape its direction. Contributions at this stage are focused on ideas and suggestions that could enhance the project's functionality. Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
