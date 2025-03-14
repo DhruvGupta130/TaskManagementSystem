@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="WEB_MODULE" version="4">
-  <component name="NewModuleRootManager">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.tmp" />
       <excludeFolder url="file://$MODULE_DIR$/temp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/admin-server/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/admin-server/target" />
+      <excludeFolder url="file://$MODULE_DIR$/api-gateway/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/api-gateway/target" />
+      <excludeFolder url="file://$MODULE_DIR$/comment-service/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/comment-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/eureka-server/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/eureka-server/target" />
+      <excludeFolder url="file://$MODULE_DIR$/notification-service/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/notification-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/react-app/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/task-service/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/task-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/user-service/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/user-service/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
