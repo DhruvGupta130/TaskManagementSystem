@@ -12,15 +12,16 @@
 ## 📖 Project Overview
 The Task Management System is a robust and scalable web application built on a microservices architecture. It streamlines task assignment, tracking, and notifications with role-based access for users, managers, and admins. The system ensures efficient task management, security, and real-time communication between services.
 
-## ✨ Key Features
-- 🧑‍💻 **User Management**: Registration, login, profile management with JWT authentication
-- 📋 **Task Management**: CRUD operations on tasks with prioritization and deadlines
-- 🔔 **Real-Time Notifications**: Deadline reminders and status updates
-- 🗂️ **Role-Based Access Control**: Different functionalities for users, managers, and admins
-- 🔄 **Service Communication**: Feign clients for inter-service calls
-- ⚙️ **Resilience & Fault Tolerance**: Resilience4j for circuit breaking and rate limiting
-- 🌐 **Microservices Architecture:** Independent services for Users, Tasks, and Notifications.
-- 🌐 **API Gateway**: Unified entry point for secure and efficient routing
+## ✨ Key Features  
+- 🧑‍💻 **User Management**: Registration, login, profile management with JWT authentication  
+- 📋 **Task Management**: CRUD operations on tasks with prioritization and deadlines  
+- 💬 **Comment System**: Add, edit, and delete comments on tasks for collaboration  
+- 🔔 **Real-Time Notifications**: Deadline reminders and status updates  
+- 🗂️ **Role-Based Access Control**: Different functionalities for users, managers, and admins  
+- 🔄 **Service Communication**: Feign clients for inter-service calls  
+- ⚙️ **Resilience & Fault Tolerance**: Resilience4j for circuit breaking and rate limiting  
+- 🌐 **Microservices Architecture**: Independent services for Users, Tasks, Notifications & Comments  
+- 🌍 **API Gateway**: Unified entry point for secure and efficient routing  
 - 🐳 **Dockerized Deployment**: Containerized services for easy deployment
 
 ## 🏗️ Tech Stack
