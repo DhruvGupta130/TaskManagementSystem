@@ -113,9 +113,9 @@ services:
       - "8081:8081"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://user-db:5432/user-db
-      DATASOURCE.USERNAME: postgres
-      DATASOURCE.PASSWORD: postgres
+      DATASOURCE_URL: jdbc:postgresql://user-db:5432/user-db
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: postgres
       HOSTNAME: user-service
       ADMIN_URL: http://admin-server:9090
       USER_SERVICE_URL: http://user-service:8081
@@ -134,9 +134,9 @@ services:
       - "8082:8082"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://task-db:5432/task-db
-      DATASOURCE.USERNAME: postgres
-      DATASOURCE.PASSWORD: postgres
+      DATASOURCE_URL: jdbc:postgresql://task-db:5432/task-db
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: postgres
       HOSTNAME: task-service
       ADMIN_URL: http://admin-server:9090
       TASK_SERVICE_URL: http://task-service:8082
@@ -156,9 +156,9 @@ services:
       - "8083:8083"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://notification-db:5432/notify-db
-      DATASOURCE.USERNAME: postgres
-      DATASOURCE.PASSWORD: postgres
+      DATASOURCE_URL: jdbc:postgresql://notification-db:5432/notify-db
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: postgres
       HOSTNAME: notification-service
       ADMIN_URL: http://admin-server:9090
       NOTIFICATION_SERVICE_URL: http://notification-service:8083
@@ -176,9 +176,9 @@ services:
       - "8084:8084"
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE.URL: jdbc:postgresql://comment-db:5432/comment-db
-      DATASOURCE.USERNAME: postgres
-      DATASOURCE.PASSWORD: postgres
+      DATASOURCE_URL: jdbc:postgresql://comment-db:5432/comment-db
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: postgres
       HOSTNAME: comment-service
       ADMIN_URL: http://admin-server:9090
       COMMENT_SERVICE_URL: http://comment-service:8084
