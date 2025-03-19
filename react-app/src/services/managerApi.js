@@ -1,7 +1,7 @@
 import axios from "axios";
-import {VITE_API_GATEWAY_URL} from "./config.js";
+import {API_GATEWAY_URL} from "./config.js";
 
-const SERVICE_URL = `${VITE_API_GATEWAY_URL}/api`;
+const SERVICE_URL = `${API_GATEWAY_URL}/api`;
 const MANAGER_SERVICE_URL = `${SERVICE_URL}/users/manager`;
 
 export const getManagerTasks = async (token) => {

@@ -1,7 +1,7 @@
 import axios from 'axios';
-import {VITE_API_GATEWAY_URL} from "./config.js";
+import {API_GATEWAY_URL} from "./config.js";
 
-const API_URL = `${VITE_API_GATEWAY_URL}/api`;
+const API_URL = `${API_GATEWAY_URL}/api`;
 
 export const login = (credentials) => axios.post(`${API_URL}/auth/login`, credentials);
 export const register = (userData) => axios.post(`${API_URL}/auth/register`, userData);
