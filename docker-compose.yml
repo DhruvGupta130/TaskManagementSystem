@@ -1,216 +1,227 @@
 services:
-  # Database for User Service
-  user-db:
+
+  # PostgreSQL Instances
+  postgres-auth:
     image: postgres:latest
-    container_name: user-db
+    container_name: postgres-auth
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: user-db
-    ports:
-      - "5433:5432"
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: task
     volumes:
-      - user-data:/var/lib/postgresql/data
-    networks:
-      - task-network
+      - pgdata-auth:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks: [ backend ]
 
-  # Database for Task Service
-  task-db:
+  postgres-task:
     image: postgres:latest
-    container_name: task-db
+    container_name: postgres-task
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: task-db
-    ports:
-      - "5434:5432"
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: task
     volumes:
-      - task-data:/var/lib/postgresql/data
-    networks:
-      - task-network
+      - pgdata-task:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks: [ backend ]
 
-  # Database for Notification Service
-  notification-db:
+  postgres-comment:
     image: postgres:latest
-    container_name: notification-db
+    container_name: postgres-comment
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: notify-db
-    ports:
-      - "5435:5432"
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: task
     volumes:
-      - notification-data:/var/lib/postgresql/data
-    networks:
-      - task-network
+      - pgdata-comment:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks: [ backend ]
 
-  # Database for Comment Service
-  comment-db:
+  postgres-notification:
     image: postgres:latest
-    container_name: comment-db
+    container_name: postgres-notification
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: comment-db
-    ports:
-      - "5436:5432"
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: task
     volumes:
-      - comment-data:/var/lib/postgresql/data
-    networks:
-      - task-network
+      - pgdata-notification:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks: [ backend ]
 
-  # Eureka Server
+  # Kafka + Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    restart: unless-stopped
+    # networks: [ backend ]
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on: [ zookeeper ]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka:29092,PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    restart: unless-stopped
+    # networks: [ backend ]
+
+  #Redis Instance
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    ports: [ "6379:6379" ]
+    volumes:
+      - redis-data:/data
+    # networks: [ backend ]
+
+  # Core Services
   eureka-server:
     build: ./eureka-server
     container_name: eureka-server
-    ports:
-      - "8761:8761"
-    networks:
-      - task-network
-    restart: always
+    ports: [ "8761:8761" ]
+    restart: unless-stopped
+    networks: [ backend ]
 
-  # Spring Boot Admin Server
   admin-server:
     build: ./admin-server
     container_name: admin-server
-    ports:
-      - "9090:9090"
+    ports: [ "9090:9090" ]
+    depends_on: [ eureka-server ]
     environment:
-      EUREKA_URL: http://eureka-server:8761/eureka/
-      HOSTNAME: admin-server
-    depends_on:
-      - eureka-server
-    networks:
-      - task-network
+      EUREKA_URL: http://eureka-server:8761/eureka
+    restart: unless-stopped
+    networks: [ backend ]
 
-  # API Gateway
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
-    ports:
-      - "8080:8080"
+    ports: [ "8080:8080" ]
+    depends_on: [ admin-server, auth-service, user-service, task-service, comment-service, notification-service ]
     environment:
-      EUREKA_URL: http://eureka-server:8761/eureka/
-      HOSTNAME: api-gateway
       ADMIN_URL: http://admin-server:9090
-      FRONTEND_URL: http://localhost:5173/
       GATEWAY_SERVICE_URL: http://api-gateway:8080
-    depends_on:
-      - eureka-server
-      - admin-server
-      - user-service
-      - notification-service
-      - task-service
-      - comment-service
-    networks:
-      - task-network
+      FRONTEND_URL: http://localhost:5173
+      JWKS_URI: http://auth-service:8085/auth/.well-known/jwks.json
+      EUREKA_URL: http://eureka-server:8761/eureka
+    restart: unless-stopped
+    networks: [ backend ]
 
-  # User Service
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports: [ "8085:8085" ]
+    depends_on: [ postgres-auth, admin-server, redis ]
+    environment:
+      DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/task
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: root
+      ADMIN_URL: http://admin-server:9090
+      AUTH_SERVICE_URL: http://auth-service:8085
+      EUREKA_URL: http://eureka-server:8761/eureka
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: unless-stopped
+    networks: [ backend ]
+
   user-service:
     build: ./user-service
     container_name: user-service
-    ports:
-      - "8081:8081"
+    ports: [ "8081:8081" ]
+    depends_on: [ auth-service ]
     environment:
-      EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE_URL: jdbc:postgresql://user-db:5432/user-db
-      DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: postgres
-      HOSTNAME: user-service
       ADMIN_URL: http://admin-server:9090
       USER_SERVICE_URL: http://user-service:8081
-    depends_on:
-      - eureka-server
-      - user-db
-      - admin-server
-    networks:
-      - task-network
+      JWKS_URI: http://auth-service:8085/auth/.well-known/jwks.json
+      EUREKA_URL: http://eureka-server:8761/eureka
+    restart: unless-stopped
+    networks: [ backend ]
 
-  # Task Service
   task-service:
     build: ./task-service
     container_name: task-service
-    ports:
-      - "8082:8082"
+    ports: [ "8082:8082" ]
+    depends_on: [ postgres-task, kafka, auth-service, redis ]
     environment:
-      EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE_URL: jdbc:postgresql://task-db:5432/task-db
+      DATASOURCE_URL: jdbc:postgresql://postgres-task:5432/task
       DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: postgres
-      HOSTNAME: task-service
+      DATASOURCE_PASSWORD: root
       ADMIN_URL: http://admin-server:9090
       TASK_SERVICE_URL: http://task-service:8082
-    depends_on:
-      - eureka-server
-      - task-db
-      - admin-server
-      - notification-service
-    networks:
-      - task-network
-
-  # Notification Service
-  notification-service:
-    build: ./notification-service
-    container_name: notification-service
-    ports:
-      - "8083:8083"
-    environment:
-      EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE_URL: jdbc:postgresql://notification-db:5432/notify-db
-      DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: postgres
-      HOSTNAME: notification-service
-      ADMIN_URL: http://admin-server:9090
-      NOTIFICATION_SERVICE_URL: http://notification-service:8083
-    depends_on:
-      - eureka-server
-      - notification-db
-      - admin-server
-    networks:
-      - task-network
+      JWKS_URI: http://auth-service:8085/auth/.well-known/jwks.json
+      EUREKA_URL: http://eureka-server:8761/eureka
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: unless-stopped
+    networks: [ backend ]
 
   comment-service:
     build: ./comment-service
     container_name: comment-service
-    ports:
-      - "8084:8084"
+    ports: [ "8084:8084" ]
+    depends_on: [ postgres-comment, auth-service, redis ]
     environment:
-      EUREKA_URL: http://eureka-server:8761/eureka/
-      DATASOURCE_URL: jdbc:postgresql://comment-db:5432/comment-db
+      DATASOURCE_URL: jdbc:postgresql://postgres-comment:5432/task
       DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: postgres
-      HOSTNAME: comment-service
+      DATASOURCE_PASSWORD: root
       ADMIN_URL: http://admin-server:9090
       COMMENT_SERVICE_URL: http://comment-service:8084
-    depends_on:
-      - eureka-server
-      - comment-db
-      - admin-server
-      - task-service
-      - user-service
-    networks:
-      - task-network
+      JWKS_URI: http://auth-service:8085/auth/.well-known/jwks.json
+      EUREKA_URL: http://eureka-server:8761/eureka
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: unless-stopped
+    networks: [ backend ]
 
-
-  # Frontend
-  react-app:
-    build: ./react-app
-    container_name: react-app
-    ports:
-      - "5173:5173"
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports: [ "8083:8083" ]
+    depends_on: [ postgres-notification, kafka, auth-service ]
     environment:
-      VITE_API_GATEWAY_URL: http://localhost:8080
-    depends_on:
-      - api-gateway
-    networks:
-      - task-network
+      DATASOURCE_URL: jdbc:postgresql://postgres-notification:5432/task
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: root
+      ADMIN_URL: http://admin-server:9090
+      NOTIFICATION_SERVICE_URL: http://notification-service:8083
+      JWKS_URI: http://auth-service:8085/auth/.well-known/jwks.json
+      EUREKA_URL: http://eureka-server:8761/eureka
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    restart: unless-stopped
+    networks: [ backend ]
 
-volumes:
-  user-data:
-  task-data:
-  notification-data:
-  comment-data:
+#  frontend:
+#    build: frontend
+#    container_name: frontend
+#    ports:
+#      - "5173:5173"
+#    restart: unless-stopped
+#    networks: [ backend ]
 
 networks:
-  task-network:
+  backend:
     driver: bridge
+
+volumes:
+  pgdata-auth:
+  pgdata-task:
+  pgdata-comment:
+  pgdata-notification:
+  redis-data:

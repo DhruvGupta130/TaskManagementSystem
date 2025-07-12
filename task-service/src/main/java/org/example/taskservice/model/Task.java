@@ -1,16 +1,21 @@
 package org.example.taskservice.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.example.taskservice.dto.Priority;
+import org.example.taskservice.dto.TaskStatus;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,32 +28,44 @@ public class Task {
     private String description;
 
     @Column(nullable = false)
-    private long assigneeId;
+    private UUID assigneeId;
 
     @Column(nullable = false)
-    private long managerId;
+    private UUID managerId;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
-    private boolean completed;
-    private boolean overdue;
+    @Column(nullable = false)
+    private LocalDate dueDate;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private TaskStatus status = TaskStatus.ASSIGNED;
+
+    @Column(columnDefinition = "TEXT")
+    private String rejectionNote;
+
+    private LocalDateTime completedAt;
+
+    @Column(columnDefinition = "TEXT")
+    private String completionNote;
+
+    private String submissionUrl;
+
+    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime lastUpdated;
-
-    @Column(nullable = false)
-    @Future(message = "Due date should always be in future")
-    private LocalDateTime dueDate;
 
     @OneToOne(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private TaskExtension extension;
 
-    public boolean isOverdue() {
-        return dueDate.isBefore(LocalDateTime.now());
+    public boolean isOverDue() {
+        return dueDate.isBefore(LocalDate.now());
     }
 
-    public enum Priority {
-        HIGH, MEDIUM, LOW
+    public boolean isCompleted() {
+        return status == TaskStatus.COMPLETED;
     }
 }

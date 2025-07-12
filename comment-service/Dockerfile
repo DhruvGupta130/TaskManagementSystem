@@ -5,10 +5,10 @@ FROM openjdk:23-jdk-slim
 WORKDIR /app
 
 # Copy the built JAR file into the container
-COPY target/comment-service-0.0.1-SNAPSHOT.jar /app/user-service.jar
+COPY target/comment-service-0.0.1-SNAPSHOT.jar /app/userInfo-service.jar
 
 # Expose the port the application runs on
 EXPOSE 8084
 
 # Run the JAR file
-ENTRYPOINT ["java", "-jar", "/app/user-service.jar"]
+ENTRYPOINT ["java", "-jar", "/app/userInfo-service.jar"]

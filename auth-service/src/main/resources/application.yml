@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/task}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:root}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 10
+      idle-timeout: 10000
+      max-lifetime: 30000
+      connection-timeout: 20000
+      validation-timeout: 5000
+      leak-detection-threshold: 10000
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+  cache:
+    type: redis
+  data:
+    jdbc:
+      dialect: postgresql
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 5s
+      client-type: lettuce
+  boot:
+    admin:
+      client:
+        url: ${ADMIN_URL:http://localhost:9090}
+        instance:
+          service-base-url: ${AUTH_SERVICE_URL:http://localhost:8085}
+server:
+  port: 8085
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    hostname: ${HOSTNAME:localhost}
+    non-secure-port: ${server.port}
+    secure-port-enabled: false
+jwt:
+  public-key: ${PUBLIC_KEY:classpath:public.pem}
+  private-key: ${PRIVATE_KEY:classpath:private.pem}
+  cookie:
+    name: refresh_token
+    secure: false
+    http-only: true
+    same-site: Lax
+    path: /api/auth/refresh
+    max-age: 7d
+  access-token:
+    expiry: 15m
+  token:
+    issuer: https://zynclip.com

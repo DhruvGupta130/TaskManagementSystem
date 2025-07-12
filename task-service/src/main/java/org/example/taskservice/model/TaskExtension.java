@@ -2,14 +2,15 @@ package org.example.taskservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+import lombok.*;
+import org.example.taskservice.dto.ExtensionStatus;
+
+import java.time.LocalDate;
 
 @Entity
-@Data
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskExtension {
@@ -17,15 +18,22 @@ public class TaskExtension {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
     @JsonIgnore
-    @JoinColumn(nullable = false)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false, unique = true)
     private Task task;
 
-    @Future(message = "Requested due date should be in the future")
     @Column(nullable = false)
-    private LocalDateTime requestedDueDate;
+    private LocalDate requestedDueDate;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 1024)
     private String reason;
+
+    @Column(length = 1024)
+    private String rejectReason;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ExtensionStatus status = ExtensionStatus.PENDING;
 }

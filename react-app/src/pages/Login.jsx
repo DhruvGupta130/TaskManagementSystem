@@ -1,86 +1,113 @@
-import {useEffect, useState} from "react";
-import { useAuth } from "../context/useAuth.jsx";
-import {useNavigate} from "react-router-dom";
-import {login} from "../services/api.js";
+import { useEffect, useState } from 'react';
+import {
+    Box,
+    Button,
+    Container,
+    TextField,
+    Typography,
+    CircularProgress,
+    Paper,
+    Link
+} from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { login } from "../store/slices/AuthSlice.js";
+import loginApi from "../api/loginApi.js";
 
 const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
+    const userRole = useSelector(state => state.auth.userRole);
+    const dispatch = useDispatch();
+    const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
-    
-    const {user, logged} = useAuth();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (error)
-            setTimeout(() => setError(''), 3000);
-    }, [error]);
-    
-    useEffect(() => {
-        if(user) {
-            navigate("/dashboard");
-        }
-    },[navigate, user]);
+        const roleRoutes = {
+            MANAGER: '/manager/dashboard',
+            WORKER: '/worker/dashboard',
+            ADMIN: '/admin',
+        };
+        const path = roleRoutes[userRole];
+        if (path) navigate(path);
+    }, [userRole, navigate]);
 
-    const handleSubmit = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
-        setError("");
+        if (!email || !password) {
+            enqueueSnackbar('Email and password are required', { variant: 'warning' });
+            return;
+        }
+        setLoading(true);
         try {
-            const res = await login({username : email, password});
-            logged(res.data.token);
-            navigate("/dashboard");
-        } catch (error) {
-            console.error("Login failed", error);
-            setError(error?.response?.data?.message || "Error when logging in");
+            const res = await loginApi.post('/auth/login', { email, password });
+            const { message, data } = res.data;
+            const { accessToken, role } = data;
+            dispatch(login({ token: accessToken, role: role }));
+            enqueueSnackbar(message || 'Login successful', { variant: 'success' });
+        } catch (err) {
+            enqueueSnackbar(err.response?.data?.message || err.message, { variant: "error" });
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
     return (
-        <div className="py-10 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-            <form className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-sm sm:max-w-md md:max-w-lg transform hover:scale-105 transition-transform duration-500" onSubmit={handleSubmit}>
-                <h2 className="text-3xl font-extrabold text-center mb-6 text-gray-900">Welcome Back</h2>
-                {error && <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>}
-                <div className="mb-6">
-                    <label className="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
-                    <input
+        <Container maxWidth="sm">
+            <Paper elevation={4} sx={{ padding: 5, mt: 10, borderRadius: 3 }}>
+                <Typography variant="h4" fontWeight="bold" gutterBottom align="center">
+                    Welcome Back
+                </Typography>
+                <Typography variant="body1" color="text.secondary" align="center" mb={3}>
+                    Please enter your credentials to log in.
+                </Typography>
+
+                <Box component="form" onSubmit={handleLogin} noValidate>
+                    <TextField
+                        label="Email"
+                        name="email"
+                        fullWidth
+                        required
+                        margin="normal"
                         type="email"
-                        placeholder="Enter your email address"
-                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
+                        autoComplete="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        required
                     />
-                </div>
-                <div className="mb-8">
-                    <label className="block text-gray-700 text-sm font-medium mb-2">Password</label>
-                    <input
+
+                    <TextField
+                        label="Password"
+                        name="password"
+                        fullWidth
+                        required
+                        margin="normal"
                         type="password"
-                        placeholder="Enter your password"
-                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
+                        autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        required
                     />
-                </div>
-                <button
-                    type="submit"
-                    className="w-full bg-indigo-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-indigo-600 transition duration-300 shadow-md cursor-pointer"
-                    disabled={isLoading}
-                >
-                    {isLoading ? "Signing In..." : "Sign In"}
-                </button>
-                <p className="text-center mt-6 text-gray-800 text-md sm:text-lg">
-                    Don’t have an account?{' '}
-                    <a href="/register" className="text-indigo-500 hover:underline font-bold">
-                        Create Now
-                    </a>
-                </p>
-            </form>
-        </div>
+
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 1 }}
+                        disabled={loading}
+                    >
+                        {loading ? <CircularProgress size={24} /> : 'Login'}
+                    </Button>
+                </Box>
+
+                <Typography variant="body2" align="center" mt={2}>
+                    Don't have an account?{' '}
+                    <Link component={RouterLink} to="/register" underline="hover">
+                        Register here
+                    </Link>
+                </Typography>
+            </Paper>
+        </Container>
     );
 };
 

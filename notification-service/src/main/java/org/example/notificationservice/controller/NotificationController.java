@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import org.example.notificationservice.model.Notifications;
 import org.example.notificationservice.service.NotificationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -15,24 +18,19 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @PostMapping
-    public ResponseEntity<Notifications> sendNotification(@RequestBody Notifications notification) {
-        return ResponseEntity.ok(notificationService.sendNotification(notification));
+    @GetMapping
+    public ResponseEntity<List<Notifications>> getAllNotifications(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(notificationService.getUsersNotifications(UUID.fromString(jwt.getClaimAsString("id"))));
     }
 
-    @GetMapping("/all/{userId}")
-    public ResponseEntity<List<Notifications>> getNotifications(@PathVariable long userId) {
-        return ResponseEntity.ok(notificationService.getUsersNotifications(userId));
+    @GetMapping("/unread")
+    public ResponseEntity<List<Notifications>> getUnreadNotifications(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(notificationService.getUnreadNotifications(UUID.fromString(jwt.getClaimAsString("id"))));
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<Notifications>> getUnreadNotification(@PathVariable long userId) {
-        return ResponseEntity.ok(notificationService.getUnreadNotifications(userId));
-    }
-
-    @GetMapping("/get/{userId}")
-    public ResponseEntity<Void> readNotifications(@PathVariable long userId) {
-        notificationService.readNotifications(userId);
+    @PutMapping("/mark-read")
+    public ResponseEntity<Void> markNotificationsAsRead(@AuthenticationPrincipal Jwt jwt) {
+        notificationService.readNotifications(UUID.fromString(jwt.getClaimAsString("id")));
         return ResponseEntity.ok().build();
     }
 }

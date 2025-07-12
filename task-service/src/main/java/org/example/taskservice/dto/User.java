@@ -1,11 +1,11 @@
 package org.example.taskservice.dto;
 
-import lombok.Data;
+import java.io.Serializable;
+import java.util.UUID;
 
-@Data
-public class User {
-    private long id;
-    private String username;
-    private String role;
-    private String name;
-}
+public record User(
+        UUID id,
+        String email,
+        String name,
+        Role role
+) implements Serializable {}

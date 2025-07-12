@@ -1,0 +1,106 @@
+spring:
+  application:
+    name: task-service
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/task}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:root}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 10
+      idle-timeout: 10000
+      max-lifetime: 30000
+      connection-timeout: 20000
+      validation-timeout: 5000
+      leak-detection-threshold: 10000
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+  cache:
+    type: redis
+  data:
+    jdbc:
+      dialect: postgresql
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 5s
+      client-type: lettuce
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 5000
+  boot:
+    admin:
+      client:
+        url: ${ADMIN_URL:http://localhost:9090}
+        instance:
+          service-base-url: ${TASK_SERVICE_URL:http://localhost:8082}
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          jwk-set-uri: ${JWKS_URI:http://localhost:8085/auth/.well-known/jwks.json}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+server:
+  port: 8082
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    hostname: ${HOSTNAME:localhost}
+    non-secure-port: ${server.port}
+    secure-port-enabled: false
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceCB:
+        failure-rate-threshold: 40
+        slow-call-rate-threshold: 50
+        slow-call-duration-threshold:
+          seconds: 3
+        wait-duration-in-open-state:
+          seconds: 10
+        permitted-number-of-calls-in-half-open-state: 5
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        automatic-transition-from-open-to-half-open-enabled: true
+
+  retry:
+    instances:
+      userServiceRetry:
+        max-attempts: 3
+        wait-duration:
+          seconds: 1
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        exponential-max-wait-duration:
+          seconds: 10
+
+  ratelimiter:
+    instances:
+      userServiceRateLimiter:
+        limit-for-period: 20
+        limit-refresh-period:
+          seconds: 1
+        timeout-duration:
+          seconds: 0

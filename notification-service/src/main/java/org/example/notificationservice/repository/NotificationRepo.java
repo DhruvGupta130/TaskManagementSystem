@@ -10,14 +10,15 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface NotificationRepo extends JpaRepository<Notifications, Long> {
+
     @Modifying
     @Query("DELETE FROM Notifications n WHERE n.timestamp < :cutoff")
     int deleteByTimestampBefore(@Param("cutoff") LocalDateTime cutoff);
 
-    List<Notifications> findAllByRecipientId(long recipientId, Sort sort);
-
-    List<Notifications> findAllByRecipientIdAndRead(long recipientId, boolean read, Sort sort);
+    List<Notifications> findAllByRecipientId(UUID recipientId, Sort sort);
+    List<Notifications> findAllByRecipientIdAndRead(UUID recipientId, boolean read, Sort sort);
 }

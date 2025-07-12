@@ -1,16 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App.jsx';
-import { AuthProvider } from './context/AuthProvider.jsx';
-import './index.css';
+import App from './App';
+import {ThemeProvider, CssBaseline} from '@mui/material';
+import theme from './theme/theme';
+import {SnackbarProvider} from "notistack";
+import { Provider } from 'react-redux';
+import { store } from './store/store';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <AuthProvider>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
-        </AuthProvider>
+        <ThemeProvider theme={theme}>
+            <CssBaseline/>
+            <SnackbarProvider
+                maxSnack={3}
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                autoHideDuration={3000}
+            >
+                <Provider store={store}>
+                    <App/>
+                </Provider>
+            </SnackbarProvider>
+        </ThemeProvider>
     </React.StrictMode>
 );

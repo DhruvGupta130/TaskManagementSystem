@@ -1,221 +1,247 @@
-# 📝 Task Management System
+# 🚀 TaskPulse – Event-Driven Task Management Microservices
 
-![Microservices Architecture](https://img.shields.io/badge/Architecture-Microservices-blue)
-![Spring Boot](https://img.shields.io/badge/Backend-Spring%20Boot-green)
-![React.js](https://img.shields.io/badge/Frontend-React.js-blue)
-![Docker](https://img.shields.io/badge/Containerization-Docker-blue)
-![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue)
-![Spring Security](https://img.shields.io/badge/Security-Spring%20Security-red)
-![Eureka](https://img.shields.io/badge/Service%20Discovery-Eureka-orange)
-![API Gateway](https://img.shields.io/badge/API%20Gateway-Spring%20Cloud%20Gateway-purple)
-
-## 📖 Project Overview
-The Task Management System is a robust and scalable web application built on a microservices architecture. It streamlines task assignment, tracking, and notifications with role-based access for users, managers, and admins. The system ensures efficient task management, security, and real-time communication between services.
-
-## ✨ Key Features  
-- 🧑‍💻 **User Management**: Registration, login, profile management with JWT authentication  
-- 📋 **Task Management**: CRUD operations on tasks with prioritization and deadlines  
-- 💬 **Comment System**: Add, edit, and delete comments on tasks for collaboration  
-- 🔔 **Real-Time Notifications**: Deadline reminders and status updates  
-- 🗂️ **Role-Based Access Control**: Different functionalities for users, managers, and admins  
-- 🔄 **Service Communication**: Feign clients for inter-service calls  
-- ⚙️ **Resilience & Fault Tolerance**: Resilience4j for circuit breaking and rate limiting  
-- 🌐 **Microservices Architecture**: Independent services for Users, Tasks, Notifications & Comments  
-- 🌍 **API Gateway**: Unified entry point for secure and efficient routing  
-- 🐳 **Dockerized Deployment**: Containerized services for easy deployment
-
-## 🏗️ Tech Stack
-### 🖥️ Frontend:
-- React.js with Tailwind CSS for a sleek and responsive UI
-- Redux for state management
-- Axios for API calls
-
-### 🖥️ Backend:
-- Spring Boot for microservices development
-- Spring Security with JWT for authentication and authorization
-- Feign Clients for service-to-service communication
-- Resilience4j for fault tolerance
-
-### 🗃️ Database:
-- PostgreSQL for reliable data management
-
-### 🛠️ DevOps:
-- Docker for containerization
-- Eureka for service discovery
-- Spring Cloud Gateway for API routing
-
-## 🏛️ Microservices Architecture
-```
-                           +-------------------------+
-                           |      API Gateway        |
-                           +-----------+-------------+
-                                       |
-        +------------------------------+-----------------------------+
-        |                              |                             |
-+----------------+       +----------------------+       +----------------------+
-| User Service   |<--+-->|    Task Service      |<----->| Notification Service |
-+----------------+   |   +----------------------+       +----------------------+
-                     |            |      
-                     |            |     
-                     |    +------------------+    
-                     +--->|  Comment Service |
-                          +------------------+    
-
-```
-Let’s add the **Comment Service** breakdown here! 📝
+> **Production-grade microservices backend** system built with Java 21, Spring Boot 3, Kafka, Redis, Docker, and
+> PostgreSQL.
+> TaskPulse orchestrates a **collaborative task lifecycle** between Managers and Workers with **asynchronous
+notifications**, **role-based access**, and a **resilient modular design** suited for cloud-native deployments.
 
 ---
 
-## 🏗️ Microservices Breakdown  
-1. **User Service:**  
-    - CRUD operations for users  
-    - Authentication and Authorization  
-    - Role management  
+## 📌 Table of Contents
 
-2. **Task Service:**  
-    - CRUD operations for tasks  
-    - Task assignment and prioritization  
+* [🫩 Microservices Overview](#🫩-microservices-overview)
+* [🛠️ Technologies Used](#️-technologies-used)
+* [📡 Inter-Service Communication](#📡-inter-service-communication)
+* [📤 Kafka-Based Notifications](#📤-kafka-based-notifications)
+* [📔️ Database Strategy](#📔️-database-strategy)
+* [🔐 Security](#🔐-security)
+* [♻️ Refresh Token Flow](#♻️-refresh-token-flow)
+* [📆 Architecture Diagram](#📆-architecture-diagram)
+* [⚙️ DevOps & Deployment](#⚙️-devops--deployment)
+* [📂 Folder Structure](#📂-folder-structure)
+* [📄 Sample Endpoints](#📄-sample-endpoints)
+* [🙋‍♂️ Author](#🙋‍♂️-author)
+* [🚀 Roadmap](#🚀-roadmap)
+* [🎩 Contributing](#🎩-contributing)
 
-3. **Notification Service:**  
-    - Real-time task updates  
-    - Deadline reminders  
-
-4. **Comment Service:** 🆕  
-    - CRUD operations for comments on tasks  
-    - Add comments to specific tasks  
 ---
 
-## 🏁 Getting Started
-### 🚧 Prerequisites
-- Java 23+
-- Node.js 18+
-- Docker & Docker Compose
-- PostgreSQL Or equivalent
+## 🫩 Microservices Overview
 
-### 🔧 Installation & Setup
-1. **Clone the repository:**
-    ```bash
-    $ git clone https://github.com/dhruvgupta130/task-management-system.git
-    ```
-2. **Set up environment variables:**
-   Create `.env` files for each microservice and set database URLs, JWT secrets, etc.
+| Service                     | Role & Responsibility                                          | Port   |
+|-----------------------------|----------------------------------------------------------------|--------|
+| 🔐 **Auth Service**         | User login, registration, JWT issuing, refresh token via Redis | `8085` |
+| 👤 **User Service**         | User profile, role management (ADMIN / MANAGER / WORKER)       | `8081` |
+| 📋 **Task Service**         | Task assignment, submission, and extension lifecycle           | `8082` |
+| 💬 **Comment Service**      | Add and retrieve threaded task comments                        | `8084` |
+| 🔔 **Notification Service** | Kafka consumer for task event notifications to workers         | `8083` |
+| 🛡️ **API Gateway**         | Secures & routes APIs, JWT validation, service whitelisting    | `8080` |
+| 🔎 **Eureka Server**        | Central service registry and discovery hub                     | `8761` |
+| 📊 **Admin Server**         | Spring Boot Admin – service health, logs, metrics              | `9090` |
 
-3. **Run services with Docker Compose:**
-    ```bash
-    $ docker-compose up --build
-    ```
-4. **Access the app:**
-   - Frontend: `http://localhost:5173`
-   - API Gateway: `http://localhost:8080`
+---
 
-## 🚀 Usage
-- **User Panel:** Manage tasks, view notifications, and update profile
-- **Manager Panel:** Assign and track tasks, monitor team progress
-- **Admin Panel:** Manage users, view system-wide data
+## 🛠️ Technologies Used
 
-## 📂 Project Structure
+| Category            | Tools / Frameworks                         |
+|---------------------|--------------------------------------------|
+| 🔧 Language & Core  | Java 21, Spring Boot 3, Spring Cloud       |
+| 🔐 Auth & Security  | JWT, Spring Security, Redis (refresh flow) |
+| 🔀 Communication    | Spring WebFlux, Feign Clients, Eureka      |
+| 📨 Messaging        | Apache Kafka (asynchronous delivery)       |
+| 📔️ Database        | PostgreSQL (per-service isolation)         |
+| ⚙️ Caching          | Redis (token & entity cache)               |
+| 📆 Containerization | Docker, Docker Compose                     |
+| 📊 Monitoring       | Spring Boot Admin, Actuator                |
+
+---
+
+## 📡 Inter-Service Communication
+
+| Type            | Usage Examples                                        |
+|-----------------|-------------------------------------------------------|
+| 🔀 REST (Feign) | Sync calls like Task → User or Comment → User         |
+| 📤 Kafka        | TaskService → NotificationService (async events)      |
+| 🛡️ JWT         | Auth-protected APIs across Gateway                    |
+| 📘 Eureka       | Auto-registration and load-balanced service discovery |
+
+---
+
+## 📤 Kafka-Based Notifications
+
+> All task-related actions like `assign`, `extend`, `submit` are published asynchronously to Kafka.
+
+* **Topic:** `notifications`
+* **Producer:** `task-service`
+* **Consumer:** `notification-service`
+* **Partitioning key:** `recipientId` (worker ID)
+
+```java
+    kafkaTemplate.send("notifications",recipientId.toString(),message);
 ```
-.
-├── user-service
-│   ├── src
-│   │   ├── controllers
-│   │   ├── client
-│   │   ├── configuration
-│   │   ├── model
-│   │   ├── dto
-│   │   ├── services
-│   │   ├── repositories
-│   ├── resources
-├── task-service
-│   ├── src
-│   │   ├── controllers
-│   │   ├── model
-│   │   ├── dto
-│   │   ├── client
-│   │   ├── exception
-│   │   ├── services
-│   │   ├── repositories
-│   │   ├── task
-│   ├── resources
-├── notification-service
-│   ├── src
-│   │   ├── controllers
-│   │   ├── model
-│   │   ├── dto
-│   │   ├── services
-│   │   ├── repositories
-│   │   ├── task
-│   ├── resources
-├── comment-service
-│   ├── src
-│   │   ├── controllers
-│   │   ├── model
-│   │   ├── services
-│   │   ├── repositories
-│   ├── resources
-├── admin-server
-├── api-gateway
-├── eureka-server
-├── react-app
-│   ├── src
-│   │   ├── components
-│   │   ├── context
-│   │   ├── management
-│   │   ├── pages
-│   │   ├── services
-│   ├── public
-├── docker-compose.yml
+
+**Benefits:**
+
+* Non-blocking delivery
+* Event decoupling
+* Fault-tolerant notification delivery
+* Horizontal scaling supported by Kafka partitions
+* Worker-specific targeting
+
+---
+
+## 📔️ Database Strategy
+
+Each microservice owns its **isolated PostgreSQL schema**, ensuring modularity and fail-safe migrations.
+
+| Service              | DB Name   | Volume Name           | Isolation |
+|----------------------|-----------|-----------------------|-----------|
+| Auth Service         | `auth`    | `pgdata-auth`         | ✅ Yes     |
+| User Service         | `user`    | `pgdata-user`         | ✅ Yes     |
+| Task Service         | `task`    | `pgdata-task`         | ✅ Yes     |
+| Comment Service      | `comment` | `pgdata-comment`      | ✅ Yes     |
+| Notification Service | `notif`   | `pgdata-notification` | ✅ Yes     |
+
+**Benefits:**
+
+* Enables CI/CD with DB versioning per service
+* Prevents cross-service coupling via DB joins
+* Each DB has its own lifecycle and scaling
+
+---
+
+## 🔐 Security
+
+* JWT-based access token (short-lived) + Redis-backed refresh token (long-lived)
+* Role-based access control using Spring Security DSL
+* API Gateway handles auth, CORS, CSRF, and whitelisted public endpoints
+* Redis ensures stateless auth and allows token revocation
+
+---
+
+## ♻️ Refresh Token Flow
+
+```java
+    @PostMapping("/refresh")
+    public ResponseEntity<Response> refresh(HttpServletRequest request) {
+        Response response = authService.refresh(request);
+        return ResponseEntity.status(response.status()).body(response);
+    }
 ```
-Let’s add the **Comment Service** API endpoints too! 📝  
+
+```java
+    public Response refresh(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) throw new RuntimeException("Refresh token missing");
+        String refreshToken = Arrays.stream(cookies)
+                .filter(cookie -> jwtCookieProperties.getName().equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .filter(jwtService::isValid)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Refresh token missing"));
+    
+        String email = jwtService.extractSubject(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+    
+        return userRepo.findByEmail(email)
+                .map(user -> new Response("Access token refreshed", HttpStatus.OK,
+                        Map.of("accessToken", jwtService.generateToken(user.getEmail(), user.getId(), user.getRole()),
+                                "role", user.getRole())))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+```
 
 ---
 
-## 🧪 API Endpoints
+## 📆 Architecture Diagram
 
-| Endpoint                      | Method   | Description                 |  
-|-------------------------------|----------|-----------------------------|  
-| **User Service**              |          |                             |  
-| `/api/users/register`         | POST     | Register a new user         |  
-| `/api/users/login`            | POST     | Authenticate user           |
-| **Task Service**              |          |                             |  
-| `/api/tasks/create`           | POST     | Create a new task           |  
-| `/api/tasks/{id}`             | GET      | Get task by ID              |
-| **Notification Service**      |          |                             |  
-| `/api/notifications/{userId}` | GET      | Get user notifications      |
-| `/api/notifications`          | POST     | Send new notification       |
-| **Comment Service**           |          |                             |  
-| `/api/comments`               | POST     | Add a comment to a task     |  
-| `/api/comments/{taskId}`      | GET      | Get all comments for a task |
+> Modular, loosely coupled microservices architecture using Kafka and Feign
+
+![Architecture Diagram](./Diagram.png)
 
 ---
 
-## 🧑‍💻 Contribution Guidelines
-We welcome feedback and suggestions to help shape its direction. Contributions at this stage are focused on ideas and suggestions that could enhance the project's functionality. Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
-1. Fork the repository.
-2. Make your changes.
-3. Submit a pull request.
-
-## 🐛 Known Issues
-- Real-time notifications need WebSocket integration.
-- Advanced filtering options for tasks are in progress.
-
-## 🐘 PostgreSQL Setup (Optional)
-
-If you don’t have PostgreSQL set up, use Docker to start a PostgreSQL container:
+## ⚙️ DevOps & Deployment
 
 ```bash
-    docker run --name postgres-container -e POSTGRES_USER=youruser -e POSTGRES_PASSWORD=yourpassword -e POSTGRES_DB=taskdb -p 5432:5432 -d postgres
+    # Start everything
+    $ docker compose up --build
 ```
 
-## 📄 License
-This project is licensed under the [MIT License](LICENSE.txt).
-
-## 💬 Contact
-For questions or suggestions, feel free to reach out:
-- **Email:** dhruvgupta130@gmail.com
-- **LinkedIn:** [Dhruv Gupta](https://www.linkedin.com/in/dhruvgupta130)
+* Kafka + Zookeeper autostart
+* Docker Compose orchestrates DBs, Redis, Admin UI, Eureka
+* Spring Boot Admin dashboard to view logs, metrics, and health
+* Future enhancement: Prometheus + Grafana monitoring
 
 ---
 
-🚀 Built with passion by Dhruv Gupta
+## 📂 Folder Structure (Sample: task-service)
 
+```
+task-service/
+├── client/             # Feign clients to other services
+├── controller/         # REST endpoints
+├── dto/                # Request/response models
+├── exception/          # Custom Exceptions and handlers
+├── kafka/              # Kafka producers
+├── model/              # JPA/Entity classes
+├── repository/         # Spring Data interfaces
+├── service/            # Business logic
+├── config/             # Web config, Kafka config, beans
+└── TaskServiceApp.java # Entry point
+```
+
+---
+
+## 📄 Sample Endpoints
+
+| Endpoint                                   | Method | Role      | Description                  |
+|--------------------------------------------|--------|-----------|------------------------------|
+| `/auth/login`                              | POST   | ❌ Public  | Authenticate and issue token |
+| `/auth/refresh`                            | POST   | ❌ Public  | Refresh access token (Redis) |
+| `/api/tasks/manager/assign`                | POST   | ✅ MANAGER | Assign task to worker        |
+| `/api/tasks/worker/submit/{id}`            | PUT    | ✅ WORKER  | Submit completed task        |
+| `/api/tasks/worker/{id}/request-extension` | POST   | ✅ WORKER  | Request extension            |
+| `/api/comments/{taskId}`                   | GET    | ✅ USER    | View task comments           |
+| `/api/notifications/me`                    | GET    | ✅ USER    | Personal notifications       |
+
+---
+
+## 🙋‍♂️ Author
+
+Built with ❤️ by [**Dhruv Gupta**](https://www.linkedin.com/in/dhruvgupta130/)
+
+* 🛠️ Java & Spring Boot Backend Engineer
+* 🔀 Kafka, DDD, Modular Design advocate
+* 🌐 GitHub: [@dhruvgupta130](https://github.com/dhruvgupta130)
+
+---
+
+## 🚀 Roadmap
+
+* [x] Dockerized service communication
+* [x] Kafka-based event architecture
+* [x] JWT + Redis refresh flow
+* [ ] WebSocket-based real-time alerts
+* [ ] OpenAPI documentation per service
+* [ ] Integration testing via Testcontainers
+* [ ] Prometheus + Grafana monitoring
+* [ ] GitHub Actions CI/CD pipeline
+
+---
+
+## 🎩 Contributing
+
+Contributions are welcome! Suggestions, issues, and pull requests are encouraged.
+
+```bash
+    # Fork & clone the repo
+    $ git clone https://github.com/dhruv-xyz/taskpulse.git
+    
+    # Start local dev
+    $ docker compose up --build
+```
+
+---
+
+> ✨ If you find this helpful, please star the project on GitHub!

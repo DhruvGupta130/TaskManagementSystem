@@ -1,112 +1,141 @@
-import {useEffect, useState} from 'react';
-import { register } from '../services/api.js';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../context/useAuth.jsx";
+import React, { useState } from 'react';
+import {
+    Box,
+    Button,
+    Container,
+    TextField,
+    Typography,
+    CircularProgress,
+    Paper,
+    Link,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Select
+} from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import loginApi from "../api/loginApi.js";
 
 const Register = () => {
-    const [formData, setFormData] = useState({ username: '', password: '', role: 'USER', name: '' });
-    const [error, setError] = useState('');
+    const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
-    
-    const { user } = useAuth();
 
-    useEffect(() => {
-        if (error)
-            setTimeout(() => setError(''), 3000);
-    }, [error]);
-    
-    useEffect(() => {
-        if(user) {
-            navigate('/dashboard');
-        }
-    }, [navigate, user]);
+    const [form, setForm] = useState({
+        name: '',
+        email: '',
+        password: '',
+        role: ''
+    });
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleRegister = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
+
+        const { name, email, password, role } = form;
+        if (!name || !email || !password || !role) {
+            enqueueSnackbar('Please fill all the fields.', { variant: 'warning' });
+            return;
+        }
+
+        setLoading(true);
+
         try {
-            await register(formData);
-            navigate('/login');
-        } catch (error) {
-            console.error(error);
-            setError(error?.response?.data?.message || 'Failed to register. Please try again.');
+            const res = await loginApi.post('/auth/register', form);
+            enqueueSnackbar(res.data.data.message || 'Registered successfully!', {
+                variant: 'success'
+            });
+
+            setTimeout(() => navigate('/login'), 500);
+        } catch (err) {
+            enqueueSnackbar(err.response?.data?.message || err.message, { variant: "error" });
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
     return (
-        <div className="py-10 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-            <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-sm sm:max-w-md md:max-w-lg transform hover:scale-105 transition-transform duration-500">
-                <h2 className="text-3xl font-extrabold text-center mb-6 text-gray-900">Create Your Account</h2>
-                {error && <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>}
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">Full Name</label>
-                        <input
-                            type="text"
-                            placeholder="Enter your full name"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
-                            required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
-                        <input
-                            type="email"
-                            placeholder="Enter your email address"
-                            value={formData.username}
-                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
-                            required
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">Password</label>
-                        <input
-                            type="password"
-                            placeholder="Create a strong password"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
-                            required
-                        />
-                    </div>
-                    {/* Role Field */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">User Role</label>
-                        <select
-                            name="role"
-                            value={formData.role}
-                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
-                            required
-                        >
-                            <option value="USER">User</option>
-                            <option value="MANAGER">Manager</option>
-                            <option value="ADMIN">Admin</option>
-                        </select>
-                    </div>
+        <Container maxWidth="sm">
+            <Paper elevation={4} sx={{ padding: 5, mt: 10, borderRadius: 3 }}>
+                <Typography variant="h4" fontWeight="bold" gutterBottom align="center">
+                    Create Account
+                </Typography>
+                <Typography variant="body1" color="text.secondary" align="center" mb={3}>
+                    Enter your details to register
+                </Typography>
 
-                    <button
+                <Box component="form" onSubmit={handleRegister} noValidate>
+                    <TextField
+                        label="Full Name"
+                        name="name"
+                        fullWidth
+                        required
+                        margin="normal"
+                        autoComplete="name"
+                        value={form.name}
+                        onChange={handleChange}
+                    />
+
+                    <TextField
+                        label="Email"
+                        name="email"
+                        fullWidth
+                        required
+                        margin="normal"
+                        type="email"
+                        autoComplete="email"
+                        value={form.email}
+                        onChange={handleChange}
+                    />
+
+                    <TextField
+                        label="Password"
+                        name="password"
+                        fullWidth
+                        required
+                        margin="normal"
+                        type="password"
+                        autoComplete="new-password"
+                        value={form.password}
+                        onChange={handleChange}
+                    />
+
+                    <FormControl fullWidth required margin="normal">
+                        <InputLabel>Role</InputLabel>
+                        <Select
+                            name="role"
+                            value={form.role}
+                            label="Role"
+                            onChange={handleChange}
+                        >
+                            <MenuItem value="MANAGER">Manager</MenuItem>
+                            <MenuItem value="WORKER">Worker</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <Button
                         type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-indigo-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-indigo-600 transition duration-300 shadow-md cursor-pointer"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3 }}
+                        disabled={loading}
                     >
-                        {isLoading ? "Registering..." : "Register"}
-                    </button>
-                </form>
-                <p className="text-center mt-6 text-gray-800 text-md sm:text-lg">
+                        {loading ? <CircularProgress size={24} /> : 'Register'}
+                    </Button>
+                </Box>
+
+                <Typography variant="body2" align="center" mt={2}>
                     Already have an account?{' '}
-                    <a href="/login" className="text-indigo-500 hover:underline font-bold">
+                    <Link component={RouterLink} to="/login" underline="hover">
                         Login here
-                    </a>
-                </p>
-            </div>
-        </div>
+                    </Link>
+                </Typography>
+            </Paper>
+        </Container>
     );
 };
 

@@ -1,107 +1,159 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthProvider.jsx';
-import Layout from './components/Layout.jsx';
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import Tasks from './pages/Tasks.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
-import Logout from "./components/Logout.jsx";
-import Notification from "./pages/Notification.jsx";
-import AdminPanel from "./management/pages/AdminPanel.jsx";
-import NotAuthorized from "./pages/NotAuthorized.jsx";
-import Users from "./management/pages/Users.jsx";
-import AllTasks from "./management/pages/AllTasks.jsx";
-import EditTask from "./management/pages/EditTask.jsx";
-import EditUser from "./management/pages/EditUser.jsx";
-import CreateUser from "./management/pages/CreateUser.jsx";
-import AdminSettings from "./management/pages/AdminSettings.jsx";
-import ManagerPanel from "./management/pages/ManagerPanel.jsx";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import PrivateRoute from './routes/PrivateRoute';
+import ManagerDashboard from "./pages/manager/ManagerDashboard";
+import Unauthorized from "./pages/Unauthorized";
+import EditTask from './pages/manager/EditTask';
+import SubmittedTasks from './pages/manager/SubmittedTasks';
+import ExtensionRequests from './pages/manager/ExtensionRequests';
+import { injectInterceptors } from "./api/api";
+import { refreshToken } from "./utils/refreshToken";
+import { login, logout } from "./store/slices/AuthSlice";
+import ManageWorkersAndTasks from "./pages/manager/ManageWorkersAndTasks.jsx";
+import MyTasks from "./pages/manager/MyTask.jsx";
+import ManageProfile from "./pages/ManageProfile.jsx";
+import WorkerDashboard from "./pages/worker/WorkerDashboard.jsx";
+import MyWorkerTasks from "./pages/worker/MyWorkerTasks.jsx";
+import relativeTime from 'dayjs/plugin/relativeTime';
+import dayjs from 'dayjs';
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import AllTasks from './pages/admin/AllTasks.jsx';
+import UserList from './pages/admin/UserList.jsx';
 
-const App = () => (
-    <AuthProvider>
-        <Routes>
-            <Route path="/" element={<Layout />}>
+dayjs.extend(relativeTime);
+
+function App() {
+    const dispatch = useDispatch();
+    const token = useSelector((state) => state.auth.token);
+
+    useEffect(() => {
+        const getToken = () => token;
+        injectInterceptors(
+            (accessToken, role) => dispatch(login({ token: accessToken, role })),
+            () => dispatch(logout()),
+            getToken
+        );
+        const refresh = async () => {
+            const { accessToken, role } = await refreshToken();
+            dispatch(login({ token: accessToken, role }));
+        }
+        refresh().then();
+    }, [dispatch, token]);
+
+    return (
+        <BrowserRouter>
+            <Routes>
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/logout" element={<Logout />} />
-                <Route path="/dashboard" element={
-                    <ProtectedRoute role={["USER", "ADMIN", "MANAGER"]} >
-                        <Dashboard />
-                    </ProtectedRoute>
-                } />
-                <Route path="/tasks" element={
-                    <ProtectedRoute role={["USER"]}>
-                        <Tasks />
-                    </ProtectedRoute>
-                } />
+                <Route path="/unauthorized" element={<Unauthorized />} />
 
-                <Route path="/notifications" element={
-                    <ProtectedRoute role={["USER"]}>
-                        <Notification/>
-                    </ProtectedRoute>
-                } />
+                {/* Manager Routes */}
+                <Route
+                    path="/manager/dashboard"
+                    element={
+                        <PrivateRoute allowedRoles={['MANAGER']}>
+                            <ManagerDashboard />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/manager/assign"
+                    element={
+                        <PrivateRoute allowedRoles={['MANAGER']}>
+                            <ManageWorkersAndTasks />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/manager/tasks"
+                    element={
+                        <PrivateRoute allowedRoles={['MANAGER']}>
+                            <MyTasks />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/manager/edit/:taskId"
+                    element={
+                        <PrivateRoute allowedRoles={['MANAGER']}>
+                            <EditTask />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/manager/submitted-tasks"
+                    element={
+                        <PrivateRoute allowedRoles={['MANAGER']}>
+                            <SubmittedTasks />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/manager/extension-requests"
+                    element={
+                        <PrivateRoute allowedRoles={['MANAGER']}>
+                            <ExtensionRequests />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/profile"
+                    element={
+                        <PrivateRoute allowedRoles={['MANAGER', "WORKER", "ADMIN"]}>
+                            <ManageProfile />
+                        </PrivateRoute>
+                    }
+                />
+                {/* Worker Routes */}
+                <Route
+                    path="/worker/dashboard"
+                    element={
+                        <PrivateRoute allowedRoles={['WORKER']}>
+                            <WorkerDashboard />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/worker/tasks"
+                    element={
+                        <PrivateRoute allowedRoles={['WORKER']}>
+                            <MyWorkerTasks />
+                        </PrivateRoute>
+                    }
+                />
 
-                <Route path="/admin" element={
-                    <ProtectedRoute role={["ADMIN"]}>
-                        <AdminPanel />
-                    </ProtectedRoute>
-                } />
+                {/* Admin Routes */}
+                <Route
+                    path="/admin"
+                    element={
+                        <PrivateRoute allowedRoles={['ADMIN']}>
+                            <AdminDashboard />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/admin/tasks"
+                    element={
+                        <PrivateRoute allowedRoles={['ADMIN']}>
+                            <AllTasks />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/admin/users"
+                    element={
+                        <PrivateRoute allowedRoles={['ADMIN']}>
+                            <UserList />
+                        </PrivateRoute>
+                    }
+                />
+            </Routes>
+        </BrowserRouter>
+    )
+}
 
-                <Route path="/admin/users" element={
-                    <ProtectedRoute role={["ADMIN"]}>
-                        <Users />
-                    </ProtectedRoute>
-                } />
-
-                <Route path="/admin/users/create" element={
-                    <ProtectedRoute role={["ADMIN"]}>
-                        <CreateUser />
-                    </ProtectedRoute>
-                } />
-
-                <Route path="/admin/users/edit/:id" element={
-                    <ProtectedRoute role={["ADMIN"]}>
-                        <EditUser />
-                    </ProtectedRoute>
-                } />
-
-                <Route path="/admin/tasks" element={
-                    <ProtectedRoute role={["ADMIN"]}>
-                        <AllTasks />
-                    </ProtectedRoute>
-                } />
-
-                <Route path="/admin/tasks/edit/:id" element={
-                    <ProtectedRoute role={["ADMIN"]}>
-                        <EditTask />
-                    </ProtectedRoute>
-                } />
-
-                <Route path="/admin/settings" element={
-                    <ProtectedRoute role={["ADMIN"]}>
-                        <AdminSettings />
-                    </ProtectedRoute>
-                } />
-
-                <Route path="/manager" element={
-                    <ProtectedRoute role={["MANAGER"]}>
-                        <ManagerPanel />
-                    </ProtectedRoute>
-                } />
-
-                <Route path="/manager/tasks/edit/:id" element={
-                    <ProtectedRoute role={["MANAGER"]}>
-                        <EditTask />
-                    </ProtectedRoute>
-                } />
-
-                <Route path="/not-authorized" element={<NotAuthorized />} />
-
-            </Route>
-        </Routes>
-    </AuthProvider>
-);
-
-export default App;
+export default App
