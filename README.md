@@ -16,6 +16,7 @@ notifications**, **role-based access**, and a **resilient modular design** suite
 * [📔️ Database Strategy](#📔️-database-strategy)
 * [🔐 Security](#🔐-security)
 * [♻️ Refresh Token Flow](#♻️-refresh-token-flow)
+* [🔑 OAuth2 + JWKS Integration](#🔑-oauth2--jwks-integration)
 * [📆 Architecture Diagram](#📆-architecture-diagram)
 * [⚙️ DevOps & Deployment](#⚙️-devops--deployment)
 * [📂 Folder Structure](#📂-folder-structure)
@@ -77,7 +78,7 @@ notifications**, **role-based access**, and a **resilient modular design** suite
 * **Partitioning key:** `recipientId` (worker ID)
 
 ```java
-    kafkaTemplate.send("notifications",recipientId.toString(),message);
+kafkaTemplate.send("notifications",recipientId.toString(),message);
 ```
 
 **Benefits:**
@@ -122,34 +123,158 @@ Each microservice owns its **isolated PostgreSQL schema**, ensuring modularity a
 ## ♻️ Refresh Token Flow
 
 ```java
-    @PostMapping("/refresh")
-    public ResponseEntity<Response> refresh(HttpServletRequest request) {
-        Response response = authService.refresh(request);
-        return ResponseEntity.status(response.status()).body(response);
-    }
+@PostMapping("/refresh")
+public ResponseEntity<Response> refresh(HttpServletRequest request) {
+    Response response = authService.refresh(request);
+    return ResponseEntity.status(response.status()).body(response);
+}
 ```
 
 ```java
-    public Response refresh(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) throw new RuntimeException("Refresh token missing");
-        String refreshToken = Arrays.stream(cookies)
-                .filter(cookie -> jwtCookieProperties.getName().equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .filter(jwtService::isValid)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Refresh token missing"));
-    
-        String email = jwtService.extractSubject(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
-    
-        return userRepo.findByEmail(email)
-                .map(user -> new Response("Access token refreshed", HttpStatus.OK,
-                        Map.of("accessToken", jwtService.generateToken(user.getEmail(), user.getId(), user.getRole()),
-                                "role", user.getRole())))
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
+public Response refresh(HttpServletRequest request) {
+    Cookie[] cookies = request.getCookies();
+    if (cookies == null) throw new RuntimeException("Refresh token missing");
+    String refreshToken = Arrays.stream(cookies)
+            .filter(cookie -> jwtCookieProperties.getName().equals(cookie.getName()))
+            .map(Cookie::getValue)
+            .filter(jwtService::isValid)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Refresh token missing"));
+
+    String email = jwtService.extractSubject(refreshToken)
+            .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+
+    return userRepo.findByEmail(email)
+            .map(user -> new Response("Access token refreshed", HttpStatus.OK,
+                    Map.of("accessToken", jwtService.generateToken(user.getEmail(), user.getId(), user.getRole()),
+                            "role", user.getRole())))
+            .orElseThrow(() -> new RuntimeException("User not found"));
+}
 ```
+
+---
+
+## 🔑 OAuth2 + JWKS Integration
+
+Enable JWT validation across microservices using a **public-private key pair** and expose a **JWKS endpoint** for secure key distribution.
+
+### 📌 Objective
+
+* Auth Service issues **signed JWTs** using **private key**
+* API Gateway and all other services **validate JWTs** via **public key**
+* JWKS endpoint makes public key **discoverable**
+
+### 🗝️ Step 1: Generate RSA Key Pair
+
+```bash
+# Generate private key
+openssl genrsa -out private.pem 2048
+
+# Extract public key
+openssl rsa -in private.pem -pubout -out public.pem
+```
+
+Place both files in `src/main/resources/keys/` inside the **Auth Service**.
+
+### 🧱 Step 2: Load Keys in Auth Service
+
+**Dependencies (pom.xml)**:
+
+```xml
+<dependency>
+  <groupId>com.nimbusds</groupId>
+  <artifactId>nimbus-jose-jwt</artifactId>
+  <version>9.37.3</version>
+</dependency>
+```
+
+**RsaKeyConfig.java**:
+
+```java
+@Configuration
+public class RsaKeyConfig {
+    @Value("classpath:keys/private.pem")
+    private Resource privateKey;
+
+    @Value("classpath:keys/public.pem")
+    private Resource publicKey;
+
+    @Bean
+    public RSAPrivateKey rsaPrivateKey() throws Exception {
+        String key = new String(privateKey.getInputStream().readAllBytes())
+            .replaceAll("-----\\w+ PRIVATE KEY-----", "")
+            .replaceAll("\\s", "");
+        byte[] decoded = Base64.getDecoder().decode(key);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
+        return (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(keySpec);
+    }
+
+    @Bean
+    public RSAPublicKey rsaPublicKey() throws Exception {
+        String key = new String(publicKey.getInputStream().readAllBytes())
+            .replaceAll("-----\\w+ PUBLIC KEY-----", "")
+            .replaceAll("\\s", "");
+        byte[] decoded = Base64.getDecoder().decode(key);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
+        return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(keySpec);
+    }
+}
+```
+
+### 🔐 Step 3: JWT Issuer Configuration
+
+```java
+@Bean
+public JwtEncoder jwtEncoder(RSAPublicKey publicKey, RSAPrivateKey privateKey) {
+    JWK jwk = new RSAKey.Builder(publicKey).privateKey(privateKey).keyID("taskpulse-key").build();
+    JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
+    return new NimbusJwtEncoder(jwks);
+}
+```
+
+### 🌐 Step 4: Expose JWKS Endpoint
+
+```java
+@RestController
+@RequestMapping("/.well-known")
+public class JwksController {
+    private final RSAPublicKey publicKey;
+
+    public JwksController(RSAPublicKey publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    @GetMapping("/jwks.json")
+    public Map<String, Object> getJwks() {
+        RSAKey jwk = new RSAKey.Builder(publicKey).keyID("taskpulse-key").build();
+        return new JWKSet(jwk).toJSONObject();
+    }
+}
+```
+
+### 🛡️ Step 5: Resource Server Setup (Other Services)
+
+**Dependencies (pom.xml)**:
+
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+</dependency>
+```
+
+**application.yml**:
+
+```yaml
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://auth-service:8085/.well-known/jwks.json
+```
+
+That’s it! All services will now verify tokens using the public key fetched from JWKS.
 
 ---
 
@@ -164,8 +289,8 @@ Each microservice owns its **isolated PostgreSQL schema**, ensuring modularity a
 ## ⚙️ DevOps & Deployment
 
 ```bash
-    # Start everything
-    $ docker compose up --build
+# Start everything
+$ docker compose up --build
 ```
 
 * Kafka + Zookeeper autostart
@@ -235,13 +360,23 @@ Built with ❤️ by [**Dhruv Gupta**](https://www.linkedin.com/in/dhruvgupta130
 Contributions are welcome! Suggestions, issues, and pull requests are encouraged.
 
 ```bash
-    # Fork & clone the repo
-    $ git clone https://github.com/dhruv-xyz/taskpulse.git
-    
-    # Start local dev
-    $ docker compose up --build
+# Fork & clone the repo
+$ git clone https://github.com/dhruv-xyz/taskpulse.git
+
+# Start local dev
+$ docker compose up --build
 ```
 
 ---
 
 > ✨ If you find this helpful, please star the project on GitHub!
+
+
+# 🚀 TaskPulse – Event-Driven Task Management Microservices
+
+> **Production-grade microservices backend** system built with Java 21, Spring Boot 3, Kafka, Redis, Docker, and
+> PostgreSQL.
+> TaskPulse orchestrates a **collaborative task lifecycle** between Managers and Workers with **asynchronous
+> notifications**, **role-based access**, and a **resilient modular design** suited for cloud-native deployments.
+
+---
