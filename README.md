@@ -9,19 +9,19 @@ notifications**, **role-based access**, and a **resilient modular design** suite
 
 ## 📌 Table of Contents
 
-* [🗒️ Microservices Overview](#-microservices-overview)
-* [🛠️ Technologies Used](#-technologies-used)
+* [🗒️ Microservices Overview](#%EF%B8%8F-microservices-overview)
+* [🛠️ Technologies Used](#%EF%B8%8F-technologies-used)
 * [📡 Inter-Service Communication](#-inter-service-communication)
 * [📤 Kafka-Based Notifications](#-kafka-based-notifications)
-* [📔️ Database Strategy](#-database-strategy)
+* [📔️ Database Strategy](#%EF%B8%8F-database-strategy)
 * [🔐 Security](#-security)
-* [♻️ Refresh Token Flow](#-refresh-token-flow)
+* [♻️ Refresh Token Flow](#%EF%B8%8F-refresh-token-flow)
 * [🔑 OAuth2 + JWKS Integration](#-oauth2--jwks-integration)
 * [📆 Architecture Diagram](#-architecture-diagram)
-* [⚙️ DevOps & Deployment](#-devops--deployment)
+* [⚙️ DevOps & Deployment](#%EF%B8%8F-devops--deployment)
 * [📂 Folder Structure](#-folder-structure-sample-task-service)
 * [📄 Sample Endpoints](#-sample-endpoints)
-* [🙋‍♂️ Author](#-author)
+* [🙋‍♂️ Author](#%EF%B8%8F-author)
 * [🚀 Roadmap](#-roadmap)
 * [🎩 Contributing](#-contributing)
 
