@@ -9,25 +9,23 @@ notifications**, **role-based access**, and a **resilient modular design** suite
 
 ## 📌 Table of Contents
 
-* [🫩 Microservices Overview](#🫩-microservices-overview)
-* [🛠️ Technologies Used](#️-technologies-used)
-* [📡 Inter-Service Communication](#📡-inter-service-communication)
-* [📤 Kafka-Based Notifications](#📤-kafka-based-notifications)
-* [📔️ Database Strategy](#📔️-database-strategy)
-* [🔐 Security](#🔐-security)
-* [♻️ Refresh Token Flow](#♻️-refresh-token-flow)
-* [🔑 OAuth2 + JWKS Integration](#🔑-oauth2--jwks-integration)
-* [📆 Architecture Diagram](#📆-architecture-diagram)
-* [⚙️ DevOps & Deployment](#⚙️-devops--deployment)
-* [📂 Folder Structure](#📂-folder-structure)
-* [📄 Sample Endpoints](#📄-sample-endpoints)
-* [🙋‍♂️ Author](#🙋‍♂️-author)
-* [🚀 Roadmap](#🚀-roadmap)
-* [🎩 Contributing](#🎩-contributing)
+* [🗒️ Microservices Overview](#microservices-overview)
+* [🛠️ Technologies Used](#technologies-used)
+* [📡 Inter-Service Communication](#inter-service-communication)
+* [📤 Kafka-Based Notifications](#kafka-based-notifications)
+* [📔️ Database Strategy](#database-strategy)
+* [🔐 Security](#security)
+* [♻️ Refresh Token Flow](#refresh-token-flow)
+* [🔑 OAuth2 + JWKS Integration](#oauth2--jwks-integration)
+* [📆 Architecture Diagram](#architecture-diagram)
+* [⚙️ DevOps & Deployment](#devops--deployment)
+* [📂 Folder Structure](#folder-structure)
+* [📄 Sample Endpoints](#sample-endpoints)
+* [🙋‍♂️ Author](#author)
+* [🚀 Roadmap](#roadmap)
+* [🎩 Contributing](#contributing)
 
----
-
-## 🫩 Microservices Overview
+## 🗒️ Microservices Overview
 
 | Service                     | Role & Responsibility                                          | Port   |
 |-----------------------------|----------------------------------------------------------------|--------|
