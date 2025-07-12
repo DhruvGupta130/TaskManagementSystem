@@ -1,4 +1,4 @@
-package org.example.notificationservice.service;
+package org.example.notificationservice.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;

@@ -3,6 +3,8 @@ package org.example.notificationservice.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.notificationservice.dto.NotificationRequest;
 import org.example.notificationservice.dto.User;
+import org.example.notificationservice.kafka.DeadLetterProducer;
+import org.example.notificationservice.kafka.NotificationConsumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

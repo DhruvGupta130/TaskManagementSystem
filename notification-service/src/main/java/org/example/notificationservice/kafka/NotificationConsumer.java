@@ -1,10 +1,12 @@
-package org.example.notificationservice.service;
+package org.example.notificationservice.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.notificationservice.dto.NotificationRequest;
 import org.example.notificationservice.dto.User;
+import org.example.notificationservice.service.NotificationService;
+import org.example.notificationservice.service.UserService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
