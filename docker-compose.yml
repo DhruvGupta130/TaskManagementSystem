@@ -56,10 +56,9 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
+    ports: [ "2181:2181" ]
     restart: unless-stopped
-    # networks: [ backend ]
+    networks: [ backend ]
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -74,11 +73,9 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-    ports:
-      - "9092:9092"
-      - "29092:29092"
+    ports: [ "9092:9092", "29092:29092" ]
     restart: unless-stopped
-    # networks: [ backend ]
+    networks: [ backend ]
 
   #Redis Instance
   redis:
@@ -89,7 +86,7 @@ services:
     ports: [ "6379:6379" ]
     volumes:
       - redis-data:/data
-    # networks: [ backend ]
+    networks: [ backend ]
 
   # Core Services
   eureka-server:
@@ -207,13 +204,15 @@ services:
     restart: unless-stopped
     networks: [ backend ]
 
-#  frontend:
-#    build: frontend
-#    container_name: frontend
-#    ports:
-#      - "5173:5173"
-#    restart: unless-stopped
-#    networks: [ backend ]
+  react-app:
+    build: ./react-app
+    container_name: react-app
+    environment:
+      VITE_BACKEND_URL: http://localhost:8080
+    ports: [ "5173:5173" ]
+    depends_on: [ api-gateway ]
+    restart: unless-stopped
+    networks: [ backend ]
 
 networks:
   backend:

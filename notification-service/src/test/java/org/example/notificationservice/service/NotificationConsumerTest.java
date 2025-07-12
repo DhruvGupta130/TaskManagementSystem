@@ -55,7 +55,7 @@ public class NotificationConsumerTest {
         String message = "{\"recipientId\":\"" + userId + "\",\"message\":\"Hi\",\"read\":false}";
 
         NotificationRequest request = new NotificationRequest("Hi", userId, false);
-        User user = new User(userId, "user@example.com", "User", User.Role.USER);
+        User user = new User(userId, "user@example.com", "User", User.Role.WORKER);
 
         when(objectMapper.readValue(eq(message), eq(NotificationRequest.class))).thenReturn(request);
         when(userService.getUserById(userId)).thenReturn(user);

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
@@ -63,13 +64,16 @@ public class TaskServiceTest {
                 .managerId(managerId)
                 .status(TaskStatus.ASSIGNED)
                 .build();
-        when(taskRepo.findAll()).thenReturn(List.of(task));
-        when(userService.getUsersByIds(anySet())).thenReturn(Map.of(workerId, dummyUser(), managerId, dummyUser()));
+        when(taskRepo.findAll(any(Sort.class))).thenReturn(List.of(task));
+        when(userService.getUsersByIds(anySet())).thenReturn(Map.of(workerId, dummyUser(workerId), managerId, dummyUser(managerId)));
 
         List<TaskDetails> result = taskService.getAllTasks();
 
+        System.out.println(userService.getUsersByIds(anySet()));
+        System.out.println(result);
+
         assertThat(result).hasSize(1);
-        verify(taskRepo).findAll();
+        verify(taskRepo).findAll(any(Sort.class));
     }
 
     @Test
@@ -81,7 +85,7 @@ public class TaskServiceTest {
                 .status(TaskStatus.ASSIGNED)
                 .build();
         when(taskRepo.findById(taskId)).thenReturn(Optional.of(task));
-        when(userService.getUsersByIds(anySet())).thenReturn(Map.of(workerId, dummyUser(), managerId, dummyUser()));
+        when(userService.getUsersByIds(anySet())).thenReturn(Map.of(workerId, dummyUser(workerId), managerId, dummyUser(managerId)));
 
         TaskDetails result = taskService.getTaskByUserId(workerId, taskId);
 
@@ -135,7 +139,7 @@ public class TaskServiceTest {
         verify(taskRepo).save(any(Task.class));
     }
 
-    private User dummyUser() {
-        return new User(UUID.randomUUID(), "test@example.com", "Test User", Role.WORKER);
+    private User dummyUser(UUID id) {
+        return new User(id, "test@example.com", "Test User", Role.WORKER);
     }
 }

@@ -24,7 +24,7 @@ public class UserServiceSpringBootTest {
     @Test
     void shouldReturnUserOnSuccess() {
         UUID userId = UUID.randomUUID();
-        User expected = new User(userId, "success@example.com", "Success User", User.Role.USER);
+        User expected = new User(userId, "success@example.com", "Success User", User.Role.WORKER);
 
         when(userClient.getUserById(userId)).thenReturn(expected);
 
