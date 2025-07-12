@@ -2,9 +2,12 @@
   <dictionary name="project">
     <words>
       <w>confluentinc</w>
+      <w>dhruv</w>
+      <w>dhruvgupta</w>
       <w>jwks</w>
       <w>pgdata</w>
       <w>postgre</w>
+      <w>taskpulse</w>
     </words>
   </dictionary>
 </component>

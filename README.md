@@ -76,7 +76,24 @@ notifications**, **role-based access**, and a **resilient modular design** suite
 * **Partitioning key:** `recipientId` (worker ID)
 
 ```java
-kafkaTemplate.send("notifications",recipientId.toString(),message);
+public class NotificationProducer {
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+
+    public void sendNotification(Notifications notification) {
+        Thread.startVirtualThread(() -> sendSync(notification));
+    }
+
+    private void sendSync(Notifications notification) {
+        try {
+            String message = objectMapper.writeValueAsString(notification);
+            kafkaTemplate.send("notifications", notification.recipientId().toString(), message);
+            log.info("📤 Published notification to Kafka for user: {}", notification.recipientId());
+        } catch (Exception e) {
+            log.error("❌ Failed to publish Kafka message", e);
+        }
+    }
+}
 ```
 
 **Benefits:**
@@ -267,7 +284,7 @@ public class JwksController {
 spring:
   security:
     oauth2:
-      resourceserver:
+      resource-server:
         jwt:
           jwk-set-uri: http://auth-service:8085/.well-known/jwks.json
 ```
