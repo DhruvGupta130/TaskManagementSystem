@@ -46,7 +46,7 @@ notifications**, **role-based access**, and a **resilient modular design** suite
 |---------------------|--------------------------------------------|
 | 🔧 Language & Core  | Java 21, Spring Boot 3, Spring Cloud       |
 | 🔐 Auth & Security  | JWT, Spring Security, Redis (refresh flow) |
-| 🔀 Communication    | Spring WebFlux, Feign Clients, Eureka      |
+| 🔀 Communication    | Spring WebSockets, Feign Clients, Eureka      |
 | 📨 Messaging        | Apache Kafka (asynchronous delivery)       |
 | 📔️ Database        | PostgreSQL (per-service isolation)         |
 | ⚙️ Caching          | Redis (token & entity cache)               |
