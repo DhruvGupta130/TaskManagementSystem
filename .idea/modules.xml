@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/TaskManagementSystem.iml" filepath="$PROJECT_DIR$/.idea/TaskManagementSystem.iml" />
-      <module fileurl="file://$PROJECT_DIR$/react-app/react-app.iml" filepath="$PROJECT_DIR$/react-app/react-app.iml" />
     </modules>
   </component>
 </project>

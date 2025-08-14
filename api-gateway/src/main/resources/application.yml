@@ -24,7 +24,7 @@ spring:
         jwt:
           jwk-set-uri: ${JWKS_URI:http://localhost:8085/auth/.well-known/jwks.json}
   frontend:
-    url: ${FRONTEND_URL:http://localhost:5173}
+    url: ${FRONTEND_URL:http://localhost:5174}
 server:
   port: 8080
 management:

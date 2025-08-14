@@ -1,16 +1,13 @@
 package org.example.commentservice.service;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import org.example.commentservice.dto.CommentRequest;
 import org.example.commentservice.dto.CommentResponse;
 import org.example.commentservice.dto.Response;
 import org.example.commentservice.model.Comment;
 import org.example.commentservice.repository.CommentRepo;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 

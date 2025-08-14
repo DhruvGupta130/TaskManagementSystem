@@ -51,7 +51,7 @@ const MyTasks = () => {
                 setLoading(false);
             }
         })();
-    }, []);
+    }, [enqueueSnackbar]);
 
     const handleOpenEdit = (id) => {
         setSelectedId(id);
@@ -246,10 +246,10 @@ const MyTasks = () => {
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
-                                sendComment();
+                                sendComment().then();
                             }
                         }}
-                        InputProps={{
+                        slotProps={{input:{
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <IconButton
@@ -260,7 +260,7 @@ const MyTasks = () => {
                                     </IconButton>
                                 </InputAdornment>
                             )
-                        }}
+                        }}}
                     />
                 </DialogActions>
             </Dialog>
