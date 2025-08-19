@@ -1,4 +1,4 @@
-# 🚀 WorkStream – Event-Driven Microservices Platform
+# 🚀 WorkStream – Event-Driven Microservices Platform for Task Orchestration
 
 > **Production-grade microservices backend** system built with Java 21, Spring Boot 3, Kafka, Redis, Docker, and
 > PostgreSQL.
@@ -14,6 +14,7 @@ notifications**, **role-based access**, and a **resilient modular design** suite
 * [📡 Inter-Service Communication](#-inter-service-communication)
 * [📤 Kafka-Based Notifications](#-kafka-based-notifications)
 * [📔️ Database Strategy](#%EF%B8%8F-database-strategy)
+* [🌐 Distributed Systems Challenges Tackled](#-distributed-systems-challenges-tackled)
 * [🔐 Security](#-security)
 * [♻️ Refresh Token Flow](#%EF%B8%8F-refresh-token-flow)
 * [🔑 OAuth2 + JWKS Integration](#-oauth2--jwks-integration)
@@ -24,6 +25,9 @@ notifications**, **role-based access**, and a **resilient modular design** suite
 * [🙋‍♂️ Author](#%EF%B8%8F-author)
 * [🚀 Roadmap](#-roadmap)
 * [🎩 Contributing](#-contributing)
+
+> ⚡ Note: Due to multiple microservices and infra components (Kafka, Redis, Postgres), WorkStream is not hosted live.
+> You can run the full platform locally with a single command using Docker Compose.
 
 ## 🗒️ Microservices Overview
 
@@ -123,6 +127,16 @@ Each microservice owns its **isolated PostgreSQL schema**, ensuring modularity a
 * Enables CI/CD with DB versioning per service
 * Prevents cross-service coupling via DB joins
 * Each DB has its own lifecycle and scaling
+
+---
+
+## 🌐 Distributed Systems Challenges Tackled
+
+- ✅ **Service Discovery** with Eureka
+- ✅ **Fault Tolerance** with Resilience4j & retries
+- ✅ **Event-driven Asynchronicity** with Kafka
+- ✅ **Data Consistency** via per-service DBs (avoiding cross joins)
+- ✅ **Stateless Auth** with JWT + Redis refresh
 
 ---
 
@@ -388,7 +402,6 @@ Built with ❤️ by [**Dhruv Gupta**](https://www.linkedin.com/in/dhruvgupta130
 ---
 
 ## 🚀 Roadmap
-
 * [x] Dockerized service communication
 * [x] Kafka-based event architecture
 * [x] JWT + Redis refresh flow
@@ -397,6 +410,8 @@ Built with ❤️ by [**Dhruv Gupta**](https://www.linkedin.com/in/dhruvgupta130
 * [ ] Integration testing via Testcontainers
 * [ ] Prometheus + Grafana monitoring
 * [ ] GitHub Actions CI/CD pipeline
+* [ ] Kubernetes Deployment (future scope)
+* [ ] gRPC for inter-service comms (stretch goal)
 
 ---
 
