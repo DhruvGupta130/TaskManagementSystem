@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/TaskManagementSystem.iml" filepath="$PROJECT_DIR$/.idea/TaskManagementSystem.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/WorkStream.iml" filepath="$PROJECT_DIR$/.idea/WorkStream.iml" />
     </modules>
   </component>
 </project>

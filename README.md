@@ -1,8 +1,8 @@
-# 🚀 TaskPulse – Event-Driven Task Management Microservices
+# 🚀 WorkStream – Event-Driven Microservices Platform
 
 > **Production-grade microservices backend** system built with Java 21, Spring Boot 3, Kafka, Redis, Docker, and
 > PostgreSQL.
-> TaskPulse orchestrates a **collaborative task lifecycle** between Managers and Workers with **asynchronous
+> WorkStream orchestrates a **collaborative task lifecycle** between Managers and Workers with **asynchronous
 notifications**, **role-based access**, and a **resilient modular design** suited for cloud-native deployments.
 
 ---
@@ -241,7 +241,7 @@ public class RsaKeyConfig {
 ```java
 @Bean
 public JwtEncoder jwtEncoder(RSAPublicKey publicKey, RSAPrivateKey privateKey) {
-    JWK jwk = new RSAKey.Builder(publicKey).privateKey(privateKey).keyID("taskpulse-key").build();
+    JWK jwk = new RSAKey.Builder(publicKey).privateKey(privateKey).keyID("WorkStream-key").build();
     JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
     return new NimbusJwtEncoder(jwks);
 }
@@ -261,7 +261,7 @@ public class JwksController {
 
     @GetMapping("/jwks.json")
     public Map<String, Object> getJwks() {
-        RSAKey jwk = new RSAKey.Builder(publicKey).keyID("taskpulse-key").build();
+        RSAKey jwk = new RSAKey.Builder(publicKey).keyID("WorkStream-key").build();
         return new JWKSet(jwk).toJSONObject();
     }
 }
@@ -376,7 +376,7 @@ Contributions are welcome! Suggestions, issues, and pull requests are encouraged
 
 ```bash
 # Fork & clone the repo
-$ git clone https://github.com/dhruv-xyz/taskpulse.git
+$ git clone https://github.com/dhruv-xyz/WorkStream.git
 
 # Start local dev
 $ docker compose up --build
@@ -387,11 +387,11 @@ $ docker compose up --build
 > ✨ If you find this helpful, please star the project on GitHub!
 
 
-# 🚀 TaskPulse – Event-Driven Task Management Microservices
+# 🚀 WorkStream – Event-Driven Task Management Microservices
 
 > **Production-grade microservices backend** system built with Java 21, Spring Boot 3, Kafka, Redis, Docker, and
 > PostgreSQL.
-> TaskPulse orchestrates a **collaborative task lifecycle** between Managers and Workers with **asynchronous
+> WorkStream orchestrates a **collaborative task lifecycle** between Managers and Workers with **asynchronous
 > notifications**, **role-based access**, and a **resilient modular design** suited for cloud-native deployments.
 
 ---
