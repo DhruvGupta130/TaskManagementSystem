@@ -293,11 +293,41 @@ That’s it! All services will now verify tokens using the public key fetched fr
 
 ---
 
-## 📆 Architecture Diagram
+## 🏗️ Architecture Diagram
 
-> Modular, loosely coupled microservices architecture using Kafka and Feign
+```mermaid
+flowchart TD
 
-![Architecture Diagram](./Diagram.png)
+    subgraph External["External Requests"]
+    end
+
+    External --> APIGateway
+
+    APIGateway[API Gateway] --> AuthService[Auth Service]
+
+    AuthService -->|/auth /refresh| DatabaseAuth[(Auth Database)]
+    AuthService --> Redis[(Redis)]
+    AuthService --> Eureka[Eureka Server]
+
+    AuthService --> UserService[User Service]
+    AuthService --> TaskService[Task Service]
+    AuthService --> CommentService[Comment Service]
+    AuthService --> NotificationService[Notification Service]
+
+    UserService --> UserDB[(User Database)]
+    TaskService --> TaskDB[(Task Database)]
+    CommentService --> CommentDB[(Comment Database)]
+    NotificationService --> NotifDB[(Notification Database)]
+
+    NotificationService -.->|Kafka| AdminServer[Admin Server]
+    CommentService --> AdminServer
+    TaskService --> AdminServer
+    UserService --> AdminServer
+    AuthService --> AdminServer
+
+    AdminServer --> Client[Client]
+    AuthService -.->|New access token| Client
+```
 
 ---
 
@@ -394,4 +424,50 @@ $ docker compose up --build
 > WorkStream orchestrates a **collaborative task lifecycle** between Managers and Workers with **asynchronous
 > notifications**, **role-based access**, and a **resilient modular design** suited for cloud-native deployments.
 
+## 🤝 Contribution Guidelines
+
+We welcome contributions! 🎉
+
+- 🐛 **Bug Reports** → Open a GitHub Issue
+- 💡 **Feature Requests** → Use the Discussions tab
+- 🛠️ **Code Contributions** → Fork & create a PR
+
+If you'd like to contribute, please follow these steps:
+
+1. **Fork the Repository**: Click the "Fork" button at the top right of the repository page.
+2. **Create a Feature Branch**: Use the command:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Commit Your Changes**: Make your changes and commit them with clear messages.
+   ```bash
+   git commit -m "Add some feature"
+   ```
+
+4. **Push to the Branch**: Push your changes to your forked repository.
+    ```bash
+   git push origin feature/your-feature-name
+    ```
+
+5. **Open a Pull Request**: Go to the original repository and click "New Pull Request".
+
+Your contributions will help enhance functionality, add new features, improve code quality, and fix bugs. Thank you for
+considering contributing!
+
+⭐ If you like this project, don’t forget to **star** the repo!
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE.txt) .
+
+## 💬 Contact
+
+For questions or suggestions, feel free to reach out:
+
+- **Email:** dhruvgupta130@gmail.com
+- **LinkedIn:** [Dhruv Gupta](https://www.linkedin.com/in/dhruvgupta130)
+
 ---
+
+🚀 Built with passion by Dhruv Gupta
